@@ -1,0 +1,4704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>森林里的日语小屋 · JLPT 词库</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Klee+One&family=Noto+Sans+JP:wght@400;700&family=Zen+Maru+Gothic:wght@400;700&family=Ma+Shan+Zheng&display=swap"
+    rel="stylesheet"
+  />
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <style>
+    :root {
+      --surface: rgba(255, 252, 248, 0.42);
+      --surface-back: rgba(245, 250, 245, 0.38);
+      --text: #2c3d33;
+      --muted: #5a6b5e;
+      --accent: #5d8a6e;
+      --known: #3d7a4f;
+      --known-bg: rgba(125, 180, 130, 0.35);
+      --unknown: #c45c6a;
+      --unknown-bg: rgba(220, 150, 140, 0.32);
+      --radius: 20px;
+      --shadow: 0 10px 36px rgba(45, 65, 50, 0.12);
+      --font-ui: "Zen Maru Gothic", "Hiragino Sans", system-ui, sans-serif;
+      --font-zh: "Ma Shan Zheng", "PingFang SC", "Microsoft YaHei", cursive;
+      --font-jp: "Noto Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", sans-serif;
+      --font-kana-hand: "Klee One", "Hiragino Maru Gothic ProN", "Zen Maru Gothic", var(--font-ui);
+      --nature-line: rgba(80, 110, 85, 0.22);
+      --glass-edge: rgba(255, 255, 255, 0.55);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font-ui);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: max(8px, env(safe-area-inset-top)) 14px max(100px, env(safe-area-inset-bottom));
+      background: linear-gradient(
+        168deg,
+        #c8d9c4 0%,
+        #a8c4a0 18%,
+        #8fb88a 42%,
+        #7aab82 58%,
+        #9bc4a8 78%,
+        #b8d4c4 100%
+      );
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    .nature-scene {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .sun-glow {
+      position: absolute;
+      top: -18%;
+      right: -8%;
+      width: min(55vw, 420px);
+      height: min(55vw, 420px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 248, 220, 0.75) 0%, rgba(255, 235, 190, 0.28) 45%, transparent 70%);
+      filter: blur(4px);
+      animation: sunPulse 14s ease-in-out infinite;
+    }
+
+    @keyframes sunPulse {
+      0%,
+      100% {
+        opacity: 0.85;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.04);
+      }
+    }
+
+    .sun-ray {
+      position: absolute;
+      top: -5%;
+      right: 5%;
+      width: 140px;
+      height: 140px;
+      background: conic-gradient(from 210deg, transparent 0deg, rgba(255, 252, 235, 0.12) 25deg, transparent 50deg);
+      border-radius: 50%;
+      animation: raySpin 48s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes raySpin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .cloud {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.55);
+      border-radius: 999px;
+      filter: blur(0.5px);
+      box-shadow: 0 4px 20px rgba(100, 120, 100, 0.08);
+      opacity: 0.88;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: inherit;
+      border-radius: 999px;
+    }
+
+    .cloud-a {
+      width: 120px;
+      height: 36px;
+      top: 8%;
+      left: 6%;
+      animation: cloudDriftA 76s ease-in-out infinite;
+    }
+
+    .cloud-a::before {
+      width: 56px;
+      height: 44px;
+      top: -18px;
+      left: 18px;
+    }
+
+    .cloud-a::after {
+      width: 72px;
+      height: 38px;
+      top: -12px;
+      right: 8px;
+    }
+
+    .cloud-b {
+      width: 90px;
+      height: 28px;
+      top: 14%;
+      right: 12%;
+      animation: cloudDriftB 88s ease-in-out infinite;
+    }
+
+    .cloud-b::before {
+      width: 48px;
+      height: 34px;
+      top: -14px;
+      left: 10px;
+    }
+
+    .cloud-b::after {
+      width: 52px;
+      height: 30px;
+      top: -10px;
+      right: 6px;
+    }
+
+    @keyframes cloudDriftA {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(28px);
+      }
+    }
+
+    @keyframes cloudDriftB {
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+      50% {
+        transform: translateX(-22px);
+      }
+    }
+
+    .tree-silhouette {
+      position: absolute;
+      bottom: 0;
+      width: 80px;
+      height: 120px;
+      opacity: 0.35;
+      background: radial-gradient(ellipse 70% 80% at 50% 100%, #3d5c45 0%, transparent 72%);
+      clip-path: polygon(50% 0%, 65% 35%, 85% 40%, 70% 55%, 90% 65%, 55% 75%, 55% 100%, 45% 100%, 45% 75%, 10% 65%, 30% 55%, 15% 40%, 35% 35%);
+    }
+
+    .tree-silhouette.t1 {
+      left: 2%;
+      height: 100px;
+      transform: scale(0.85);
+    }
+
+    .tree-silhouette.t2 {
+      right: 4%;
+      height: 130px;
+      transform: scaleX(-1) scale(0.95);
+    }
+
+    .grass-footer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 48px;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 0%, rgba(70, 110, 78, 0.2) 55%, rgba(55, 90, 65, 0.35) 100%);
+      mask-image: repeating-linear-gradient(90deg, #000 0px, #000 8px, transparent 8px, transparent 14px);
+      mask-size: 14px 100%;
+      -webkit-mask-image: repeating-linear-gradient(90deg, #000 0px, #000 8px, transparent 8px, transparent 14px);
+      opacity: 0.65;
+    }
+
+    .grass-header {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 22px;
+      z-index: 0;
+      pointer-events: none;
+      background: linear-gradient(0deg, transparent 0%, rgba(90, 130, 95, 0.12) 100%);
+      opacity: 0.9;
+    }
+
+    .ambient {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ambient span.ambient-leaf {
+      position: absolute;
+      top: -10%;
+      opacity: 0.55;
+      animation: leafFall linear infinite;
+      will-change: transform;
+    }
+
+    .ambient-leaf {
+      width: 14px;
+      height: 10px;
+      background: linear-gradient(135deg, rgba(180, 205, 150, 0.95), rgba(140, 175, 120, 0.75));
+      border-radius: 0 80% 60% 80%;
+      transform-origin: 50% 50%;
+      box-shadow: 0 1px 3px rgba(60, 90, 60, 0.15);
+    }
+
+    .ambient span.ambient-butterfly {
+      position: absolute;
+      top: 20%;
+      opacity: 0.5;
+      font-size: 0.95rem;
+      animation: butterflyPath ease-in-out infinite;
+    }
+
+    @keyframes leafFall {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(110vh) translateX(35px) rotate(280deg);
+      }
+    }
+
+    @keyframes butterflyPath {
+      0%,
+      100% {
+        transform: translate(0, 0) scaleX(1);
+      }
+      25% {
+        transform: translate(20px, -30px) scaleX(-1);
+      }
+      50% {
+        transform: translate(-10px, -15px) scaleX(1);
+      }
+      75% {
+        transform: translate(15px, 8px) scaleX(-1);
+      }
+    }
+
+    @keyframes floatFall {
+      0% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+      }
+      100% {
+        transform: translateY(110vh) translateX(20px) rotate(360deg);
+      }
+    }
+
+    #studyView header,
+    #homeView,
+    #appLayout,
+    .site-header,
+    main {
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body {
+        animation: none;
+      }
+      .ambient span.ambient-leaf,
+      .ambient span.ambient-butterfly,
+      .sun-ray,
+      .cloud-a,
+      .cloud-b {
+        animation: none !important;
+      }
+      .ambient-leaf {
+        opacity: 0.2;
+      }
+      .mushroom-parade .shroom,
+      .sun-glow,
+      .daily-plan-box.daily-plan-celebrate,
+      .sidebar-stick.sidebar-complete {
+        animation: none;
+      }
+      .squirrel-img-wrap {
+        animation: none !important;
+      }
+    }
+
+    body.is-loading .app-layout,
+    body.is-loading .site-header,
+    body.is-loading .squirrel-companion {
+      visibility: hidden;
+    }
+
+    .page-wrap {
+      width: 100%;
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .app-layout {
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      align-items: start;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (min-width: 900px) {
+      .app-layout {
+        grid-template-columns: minmax(0, 860px) 88px;
+        gap: 12px;
+        justify-content: center;
+      }
+    }
+
+    .site-header {
+      text-align: center;
+      padding: 4px 8px 8px;
+      margin-bottom: 0;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .page-title {
+      margin: 0;
+      font-family: var(--font-ui);
+      font-size: clamp(1.02rem, 3.4vw, 1.28rem);
+      font-weight: 700;
+      color: #2f4a38;
+      letter-spacing: 0.12em;
+      text-shadow: 0 2px 0 rgba(255, 255, 255, 0.35), 0 6px 24px rgba(80, 120, 90, 0.15);
+    }
+
+    .page-title-kana {
+      display: block;
+      margin-top: 2px;
+      font-family: var(--font-kana-hand);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      color: #4a6654;
+      opacity: 0.94;
+    }
+
+    .daily-plan-box {
+      margin-top: 10px;
+      padding: 10px 12px 12px;
+      border-radius: 18px;
+      background: rgba(255, 252, 246, 0.48);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 8px 28px rgba(60, 90, 70, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      background-image: repeating-linear-gradient(
+        -12deg,
+        transparent,
+        transparent 18px,
+        rgba(120, 150, 110, 0.04) 18px,
+        rgba(120, 150, 110, 0.04) 19px
+      );
+      transition: box-shadow 0.25s ease, transform 0.2s ease;
+    }
+
+    @media (hover: hover) {
+      .daily-plan-box:hover {
+        box-shadow: 0 10px 32px rgba(60, 90, 70, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      }
+    }
+
+    .daily-plan-box.daily-plan-celebrate {
+      animation: dailyPlanCelebrate 1.1s ease-in-out infinite;
+      box-shadow: 0 8px 28px rgba(60, 90, 70, 0.1), 0 0 0 2px rgba(180, 220, 160, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    @keyframes dailyPlanCelebrate {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-3px);
+      }
+    }
+
+    .daily-plan-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px 12px;
+      margin-bottom: 8px;
+    }
+
+    .daily-plan-head label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #3d5346;
+    }
+
+    .goal-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .goal-chip {
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(60, 95, 70, 0.35);
+      background: linear-gradient(160deg, #6a9e78 0%, #4a7358 48%, #3d6048 100%);
+      font-family: var(--font-ui);
+      font-size: 0.74rem;
+      font-weight: 800;
+      color: #f4fff6;
+      cursor: pointer;
+      box-shadow: 0 3px 0 rgba(40, 70, 50, 0.35), 0 6px 14px rgba(50, 90, 60, 0.18);
+      transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .goal-chip.is-active {
+      background: linear-gradient(155deg, #7aab82 0%, #5d8a6e 45%, #3d6048 100%);
+      border-color: rgba(255, 255, 255, 0.55);
+      color: #fff;
+      box-shadow: 0 0 22px rgba(120, 210, 150, 0.65), 0 0 12px rgba(255, 250, 200, 0.45), 0 3px 0 rgba(40, 70, 50, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    @media (hover: hover) {
+      .goal-chip:hover:not(.is-active) {
+        filter: brightness(1.06);
+        transform: translateY(-2px);
+      }
+    }
+
+    .goal-chip:active {
+      transform: scale(0.97);
+    }
+
+    .goal-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .goal-input-wrap input {
+      width: 52px;
+      padding: 5px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--nature-line);
+      background: rgba(255, 255, 255, 0.65);
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #2c3d33;
+      text-align: center;
+    }
+
+    .daily-plan-status {
+      font-size: 0.76rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: #3a5244;
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .daily-plan-status strong {
+      color: #2a6b45;
+      font-weight: 800;
+    }
+
+    .daily-plan-hint {
+      margin: 0 0 6px;
+      font-size: 0.66rem;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      color: #6b7c6e;
+      line-height: 1.4;
+    }
+
+    .daily-plan-track {
+      position: relative;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(80, 110, 85, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      overflow: hidden;
+      box-shadow: inset 0 2px 6px rgba(60, 90, 70, 0.08);
+    }
+
+    .daily-plan-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #8fbc8f, #c8e6c9 45%, #fff9e6 100%);
+      transition: width 0.5s cubic-bezier(0.34, 1.2, 0.64, 1);
+      box-shadow: 0 0 16px rgba(255, 235, 180, 0.45);
+    }
+
+    .daily-plan-track.is-full .daily-plan-fill {
+      box-shadow: 0 0 20px rgba(255, 220, 150, 0.65);
+    }
+
+    .study-daily-strip {
+      width: 100%;
+      margin: 6px 0 8px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255, 252, 246, 0.42);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: 0 4px 18px rgba(60, 90, 70, 0.08);
+    }
+
+    .study-daily-strip .daily-plan-status {
+      margin-bottom: 6px;
+      font-size: 0.74rem;
+    }
+
+    .study-daily-strip .daily-plan-track {
+      height: 12px;
+    }
+
+    .study-sidebar {
+      display: none;
+      position: sticky;
+      top: max(12px, env(safe-area-inset-top));
+      align-self: start;
+      justify-self: center;
+    }
+
+    @media (min-width: 900px) {
+      .study-sidebar {
+        display: block;
+      }
+    }
+
+    .sidebar-stick {
+      width: 72px;
+      min-height: 220px;
+      padding: 10px 6px 12px;
+      border-radius: 16px;
+      background: rgba(255, 252, 246, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 8px 28px rgba(60, 90, 70, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .sidebar-stick.sidebar-complete {
+      border-color: rgba(180, 220, 160, 0.75);
+      box-shadow: 0 8px 28px rgba(60, 90, 70, 0.12), 0 0 22px rgba(140, 210, 150, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      animation: sidebarCelebrate 1.2s ease-in-out infinite;
+    }
+
+    @keyframes sidebarCelebrate {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-2px);
+      }
+    }
+
+    .sidebar-tree {
+      line-height: 0;
+      opacity: 0.88;
+      filter: drop-shadow(0 2px 4px rgba(60, 90, 70, 0.2));
+    }
+
+    .sidebar-tree svg {
+      display: block;
+    }
+
+    .sidebar-bar-track {
+      flex: 1;
+      width: 10px;
+      min-height: 72px;
+      border-radius: 999px;
+      background: rgba(80, 110, 85, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .sidebar-bar-fill {
+      width: 100%;
+      height: 0%;
+      min-height: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #a5d6a7, #c8e6c9, #fff9c4);
+      transition: height 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+      box-shadow: 0 0 10px rgba(200, 230, 180, 0.6);
+    }
+
+    .sidebar-stick.sidebar-complete .sidebar-bar-fill {
+      box-shadow: 0 0 14px rgba(255, 230, 140, 0.85);
+    }
+
+    .sidebar-pct {
+      font-family: var(--font-ui);
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #2f4a38;
+      text-align: center;
+      line-height: 1.1;
+      max-width: 100%;
+      word-break: break-word;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .sidebar-line {
+      font-family: var(--font-ui);
+      font-size: 0.52rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.2;
+      max-width: 100%;
+    }
+
+    .mushroom-parade {
+      width: 100%;
+      max-width: 860px;
+      margin: 10px auto 0;
+      padding: 6px 12px 8px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: clamp(18px, 6vw, 40px);
+      pointer-events: none;
+      user-select: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .mushroom-parade .shroom {
+      position: relative;
+      width: 22px;
+      height: 34px;
+      flex-shrink: 0;
+      animation: shroomBob 3s ease-in-out infinite;
+    }
+
+    .mushroom-parade .shroom:nth-child(2) {
+      animation-delay: 0.35s;
+      width: 20px;
+      height: 30px;
+    }
+
+    .mushroom-parade .shroom:nth-child(3) {
+      animation-delay: 0.7s;
+      width: 24px;
+      height: 36px;
+    }
+
+    .mushroom-parade .shroom:nth-child(4) {
+      animation-delay: 1s;
+      width: 19px;
+      height: 28px;
+    }
+
+    .mushroom-parade .shroom:nth-child(5) {
+      animation-delay: 1.25s;
+    }
+
+    .mushroom-parade .cap {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 26px;
+      height: 16px;
+      transform: translateX(-50%);
+      border-radius: 50% 50% 45% 45%;
+      background: radial-gradient(circle at 35% 25%, #f5b8b8 0%, #e57373 42%, #c62828 100%);
+      box-shadow: inset 0 -3px 6px rgba(80, 20, 20, 0.25), 0 3px 6px rgba(60, 40, 40, 0.15);
+    }
+
+    .mushroom-parade .cap.alt {
+      background: radial-gradient(circle at 40% 20%, #ffe0b2 0%, #ffb74d 50%, #e65100 100%);
+    }
+
+    .mushroom-parade .stem {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      width: 12px;
+      height: 18px;
+      transform: translateX(-50%);
+      border-radius: 4px 4px 5px 5px;
+      background: linear-gradient(90deg, #fff8f0, #f5e6d3 45%, #e8d4c0);
+      box-shadow: inset 0 0 0 1px rgba(180, 150, 120, 0.35);
+    }
+
+    .mushroom-parade .dots::before,
+    .mushroom-parade .dots::after {
+      content: "";
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.75);
+      top: 5px;
+    }
+
+    .mushroom-parade .dots::before {
+      left: 7px;
+    }
+
+    .mushroom-parade .dots::after {
+      right: 7px;
+      width: 3px;
+      height: 3px;
+      top: 9px;
+    }
+
+    @keyframes shroomBob {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    .boot-mascot {
+      margin-bottom: 4px;
+    }
+
+    .boot-squirrel-img {
+      display: block;
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(60, 90, 70, 0.15));
+    }
+
+    .boot-screen {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+      font-weight: 800;
+      color: #2f4a38;
+      z-index: 50;
+      background: linear-gradient(168deg, #c8d9c4 0%, #8fb88a 50%, #b8d4c4 100%);
+    }
+
+    .boot-screen.is-hidden {
+      display: none;
+    }
+
+    .boot-spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.55);
+      border-top-color: #4a7c59;
+      animation: spin 0.85s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .boot-error {
+      max-width: 360px;
+      line-height: 1.55;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    .boot-error code {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    #studyView > header {
+      width: 100%;
+      margin-bottom: 2px;
+    }
+
+    .level-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .level-row .filter-btn {
+      flex: 1;
+      min-width: calc(20% - 6px);
+    }
+
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      min-width: 0;
+      padding: 8px 6px;
+      border-radius: 12px;
+      font-family: var(--font-ui);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      background: rgba(255, 252, 246, 0.45);
+      color: #4a5e50;
+      border: 1px dashed var(--nature-line);
+      transition: transform 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .filter-btn:active {
+      transform: scale(0.97);
+    }
+
+    .filter-btn.is-active {
+      background: rgba(165, 200, 160, 0.55);
+      color: #1e3428;
+      border-style: solid;
+      border-color: rgba(90, 130, 95, 0.4);
+    }
+
+    .filter-btn.is-disabled {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .filter-btn.fav-entry.is-active {
+      background: rgba(220, 190, 120, 0.4);
+      color: #5c4a20;
+      border-color: rgba(180, 150, 80, 0.45);
+    }
+
+    .progress-bar {
+      position: relative;
+      height: 8px;
+      background: rgba(80, 110, 85, 0.1);
+      border-radius: 999px;
+      overflow: visible;
+      margin-bottom: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #7aab82, #a5d6a7, #c8e6c9);
+      transition: width 0.45s cubic-bezier(0.34, 1.2, 0.64, 1);
+    }
+
+    .progress-bar-sakura {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 4px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .progress-bar.is-blooming .progress-bar-sakura {
+      opacity: 1;
+    }
+
+    .sakura-petal {
+      font-size: 0.6rem;
+      animation: petalPop 0.6s ease-out both;
+    }
+
+    @keyframes petalPop {
+      from {
+        transform: scale(0) translateY(4px);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .progress-count {
+      font-size: 0.88rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      letter-spacing: 0.02em;
+    }
+
+    .progress-count span {
+      color: #2a6b45;
+      font-weight: 800;
+    }
+
+    .stats {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-family: var(--font-ui);
+    }
+
+    .stats strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .card-rainbow {
+      position: relative;
+      padding: 3px;
+      border-radius: calc(var(--radius) + 8px);
+      background: linear-gradient(125deg, #a8c4a0, #c8d9c4, #e8dfc8, #b8d4c4, #9bc4a8);
+      background-size: 220% 220%;
+      animation: rainbowBorderFlow 18s linear infinite;
+      box-shadow: var(--shadow);
+    }
+
+    @keyframes rainbowBorderFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      100% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .card-rainbow-inner {
+      position: relative;
+      border-radius: calc(var(--radius) + 5px);
+      background: rgba(255, 252, 248, 0.5);
+      backdrop-filter: blur(16px) saturate(1.05);
+      -webkit-backdrop-filter: blur(16px) saturate(1.05);
+      border: 1px solid var(--glass-edge);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 16px 40px rgba(60, 90, 70, 0.1);
+      background-image: repeating-linear-gradient(
+        88deg,
+        transparent,
+        transparent 21px,
+        rgba(100, 130, 95, 0.035) 21px,
+        rgba(100, 130, 95, 0.035) 22px
+      );
+    }
+
+    .relearn-pin {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      z-index: 25;
+      min-width: 36px;
+      height: 36px;
+      padding: 0 8px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: var(--font-ui);
+      font-size: 0.62rem;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #6b7c6e;
+      background: rgba(255, 252, 246, 0.55);
+      border: 1px solid rgba(180, 195, 185, 0.55);
+      box-shadow: 0 2px 8px rgba(60, 90, 70, 0.06);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s ease, background 0.2s ease, color 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .relearn-pin.is-visible {
+      display: flex;
+    }
+
+    @media (hover: hover) {
+      .relearn-pin:hover {
+        background: rgba(255, 255, 255, 0.75);
+        color: #4a5e50;
+        transform: translateY(-2px);
+      }
+    }
+
+    .relearn-pin:active {
+      transform: scale(0.96);
+    }
+
+    .fav-pin {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      z-index: 25;
+      width: 44px;
+      height: 44px;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 1.35rem;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 252, 246, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 14px rgba(80, 110, 85, 0.15);
+      transition: transform 0.2s cubic-bezier(0.34, 1.4, 0.64, 1), background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      .fav-pin:hover {
+        transform: translateY(-2px) scale(1.06);
+      }
+    }
+
+    .fav-pin:active {
+      transform: scale(0.92);
+    }
+
+    .fav-pin.spin-once .ico {
+      animation: favSpin 0.55s cubic-bezier(0.34, 1.3, 0.64, 1);
+    }
+
+    @keyframes favSpin {
+      0% {
+        transform: rotate(0deg) scale(1);
+      }
+      60% {
+        transform: rotate(200deg) scale(1.15);
+      }
+      100% {
+        transform: rotate(360deg) scale(1);
+      }
+    }
+
+    .fav-pin.is-on {
+      background: linear-gradient(145deg, rgba(255, 248, 220, 0.95), rgba(220, 235, 180, 0.9));
+      box-shadow: 0 4px 14px rgba(180, 160, 80, 0.25);
+    }
+
+    .fav-pin .ico {
+      display: block;
+      transition: transform 0.2s ease;
+    }
+
+    .fav-pin.is-on .ico {
+      transform: scale(1.12);
+      filter: drop-shadow(0 1px 2px rgba(180, 83, 9, 0.35));
+    }
+
+    .pos-icon-lg {
+      font-size: clamp(2.2rem, 7vw, 2.85rem);
+      line-height: 1;
+      margin-bottom: 6px;
+      opacity: 0.98;
+      filter: drop-shadow(0 3px 6px rgba(255, 255, 255, 0.75));
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .scene-wrap {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: visible;
+    }
+
+    .star-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: visible;
+    }
+
+    .star-particle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-size: clamp(0.95rem, 3vw, 1.25rem);
+      line-height: 1;
+      pointer-events: none;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+      animation: starPop 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes starPop {
+      0% {
+        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+        opacity: 0;
+      }
+      15% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1.1) rotate(var(--rot));
+        opacity: 0;
+      }
+    }
+
+    .scene {
+      perspective: 1400px;
+      height: 320px;
+      min-height: 320px;
+      max-height: 320px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: var(--radius);
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 320px;
+      transform-style: preserve-3d;
+      transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+      border-radius: var(--radius);
+    }
+
+    .scene.is-flipped .card {
+      transform: rotateY(180deg);
+    }
+
+    .scene.scene-no-flip-trans .card {
+      transition: none !important;
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius);
+      background: var(--surface);
+      backdrop-filter: blur(18px) saturate(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(1.08);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 12px 36px rgba(60, 90, 70, 0.1);
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      justify-content: stretch;
+      padding: 12px 14px;
+      padding-top: 40px;
+      text-align: left;
+      overflow: hidden;
+    }
+
+    .face-corner {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      opacity: 0.72;
+      z-index: 2;
+    }
+
+    .face-corner::before,
+    .face-corner::after {
+      content: "";
+      position: absolute;
+      background: linear-gradient(90deg, rgba(120, 160, 120, 0.75), rgba(180, 200, 140, 0.55));
+    }
+
+    .face-corner.tl {
+      top: 8px;
+      left: 8px;
+    }
+
+    .face-corner.tl::before {
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 2px;
+      border-radius: 2px;
+    }
+
+    .face-corner.tl::after {
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .face-corner.tr {
+      top: 8px;
+      right: 8px;
+      transform: scaleX(-1);
+    }
+
+    .face-corner.tr::before {
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 2px;
+      border-radius: 2px;
+    }
+
+    .face-corner.tr::after {
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .face-corner.bl {
+      bottom: 8px;
+      left: 8px;
+      transform: scaleY(-1);
+    }
+
+    .face-corner.bl::before {
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 2px;
+      border-radius: 2px;
+    }
+
+    .face-corner.bl::after {
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .face-corner.br {
+      bottom: 8px;
+      right: 8px;
+      transform: scale(-1);
+    }
+
+    .face-corner.br::before {
+      top: 0;
+      left: 0;
+      width: 14px;
+      height: 2px;
+      border-radius: 2px;
+    }
+
+    .face-corner.br::after {
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .face-decor {
+      display: none;
+    }
+
+    .face-back {
+      transform: rotateY(180deg);
+      background: var(--surface-back);
+      backdrop-filter: blur(18px) saturate(1.05);
+      -webkit-backdrop-filter: blur(18px) saturate(1.05);
+    }
+
+    .face-back::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.2;
+      pointer-events: none;
+      background-image: radial-gradient(circle at 20% 30%, rgba(140, 180, 130, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(200, 210, 160, 0.1) 0%, transparent 40%);
+      mix-blend-mode: multiply;
+    }
+
+    .face-back::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.06;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        -32deg,
+        transparent,
+        transparent 12px,
+        rgba(90, 120, 85, 0.12) 12px,
+        rgba(90, 120, 85, 0.12) 13px
+      );
+    }
+
+    .card-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      min-height: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card-col-left {
+      flex: 0 0 38%;
+      max-width: 42%;
+      padding-right: 10px;
+      border-right: 1px solid rgba(90, 120, 95, 0.15);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      align-self: stretch;
+    }
+
+    .card-col-right {
+      flex: 1;
+      padding-left: 12px;
+      justify-content: flex-start;
+      align-items: stretch;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .face-front .card-col-right {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .face-back .card-col-right {
+      justify-content: flex-start;
+      min-height: 0;
+    }
+
+    .back-scroll {
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-right: 4px;
+      text-align: left;
+    }
+
+    .rainbow-arc {
+      display: none;
+    }
+
+    .hint {
+      font-size: 0.68rem;
+      font-family: var(--font-ui);
+      color: #4a6654;
+      margin-bottom: 6px;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+    }
+
+    .face-back .card-col-left .hint {
+      margin-bottom: 4px;
+    }
+
+    .chinese {
+      font-family: var(--font-zh);
+      font-size: 2.2rem;
+      font-weight: 400;
+      line-height: 1.35;
+      letter-spacing: normal;
+      color: #24392c;
+      text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .chinese--dup {
+      font-size: clamp(1.45rem, 4.2vw, 2.2rem);
+    }
+
+    .kanji-main {
+      font-family: var(--font-jp);
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      line-height: 1.25;
+      text-align: left;
+      color: #1e3428;
+    }
+
+    .furigana-line {
+      font-family: var(--font-ui);
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: #6b4f6e;
+      text-align: left;
+      margin-bottom: 8px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 6px;
+      align-items: flex-start;
+      margin-bottom: 4px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      font-family: var(--font-jp);
+    }
+
+    .meta-tag {
+      flex-shrink: 0;
+      padding: 2px 7px;
+      border-radius: 8px;
+      background: rgba(165, 200, 160, 0.45);
+      color: #1e3428;
+      font-weight: 800;
+      font-size: 0.62rem;
+      font-family: var(--font-ui);
+      border: 1px solid rgba(90, 130, 95, 0.2);
+    }
+
+    .meta-val {
+      font-weight: 600;
+      color: #2c3d33;
+      font-size: 0.78rem;
+    }
+
+    .hosoku-line {
+      font-family: var(--font-jp);
+      font-size: 0.78rem;
+      color: #3d5346;
+      font-weight: 500;
+      margin: 4px 0 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px dashed var(--nature-line);
+      line-height: 1.5;
+    }
+
+    .hosoku-line.is-hidden,
+    .example-block.is-hidden {
+      display: none;
+    }
+
+    .example-block {
+      margin-bottom: 8px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.38);
+      border: 1px solid rgba(120, 150, 120, 0.22);
+      border-left: 3px solid rgba(130, 170, 130, 0.65);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    }
+
+    .ex-label {
+      font-size: 1rem;
+      line-height: 1;
+      font-weight: 400;
+      font-family: var(--font-ui);
+      color: #5a8a62;
+      margin-bottom: 5px;
+      letter-spacing: 0;
+      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.6));
+    }
+
+    .ex-jp {
+      font-family: var(--font-jp);
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.8;
+      margin-bottom: 3px;
+      word-break: break-word;
+      color: #1e3428;
+    }
+
+    .ex-furi {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      color: #6b4f6e;
+      font-weight: 400;
+      line-height: 1.8;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .ex-zh {
+      font-family: var(--font-jp);
+      font-size: 0.95rem;
+      color: #7a9082;
+      font-weight: 400;
+      line-height: 1.8;
+      letter-spacing: normal;
+      font-style: italic;
+    }
+
+    .tap-hint {
+      margin-top: auto;
+      padding-top: 6px;
+      font-size: 0.68rem;
+      font-family: var(--font-ui);
+      color: #5a6b5e;
+      font-weight: 600;
+    }
+
+    .face-front .tap-hint {
+      text-align: center;
+      width: 100%;
+    }
+
+    .face-back .tap-hint {
+      text-align: center;
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .study-aux-bar {
+      display: flex;
+      justify-content: center;
+      margin-top: 6px;
+      margin-bottom: 2px;
+    }
+
+    .btn-session-reset {
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-family: var(--font-ui);
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #7a8a7e;
+      background: rgba(255, 252, 246, 0.42);
+      border: 1px dashed rgba(140, 160, 145, 0.45);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      .btn-session-reset:hover {
+        background: rgba(255, 255, 255, 0.55);
+        color: #5a6b5e;
+      }
+    }
+
+    .btn-session-reset:active {
+      transform: scale(0.98);
+    }
+
+    .action-strip {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 10px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .action-strip button {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 8px;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      border-radius: 14px;
+    }
+
+    .actions {
+      display: contents;
+    }
+
+    button {
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      button:hover:not(:disabled):not(.btn-known):not(.btn-unknown):not(.goal-chip):not(.fav-pin):not(.relearn-pin):not(.squirrel-hit) {
+        transform: translateY(-2px);
+      }
+      .filter-btn:hover:not(.is-disabled):not(:disabled) {
+        transform: translateY(-2px);
+      }
+      .btn-session-reset:hover {
+        transform: translateY(-2px);
+      }
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+    }
+
+    button:active:not(.btn-known):not(.btn-unknown) {
+      transform: scale(0.97);
+    }
+
+    .btn-known {
+      background: var(--known-bg);
+      color: var(--known);
+      border: 1px solid rgba(90, 140, 95, 0.35);
+      box-shadow: 0 5px 0 rgba(100, 150, 110, 0.55), 0 8px 18px rgba(60, 100, 70, 0.12);
+      transition: transform 0.15s cubic-bezier(0.34, 1.5, 0.64, 1), box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    .btn-unknown {
+      background: var(--unknown-bg);
+      color: var(--unknown);
+      border: 1px solid rgba(180, 100, 100, 0.3);
+      box-shadow: 0 5px 0 rgba(200, 140, 130, 0.55), 0 8px 18px rgba(120, 70, 70, 0.1);
+      transition: transform 0.15s cubic-bezier(0.34, 1.5, 0.64, 1), box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    @media (hover: hover) {
+      .btn-known:hover,
+      .btn-unknown:hover {
+        filter: brightness(1.02);
+        transform: translateY(-2px) scale(1.03);
+      }
+    }
+
+    .btn-known:active,
+    .btn-unknown:active {
+      animation: btnBounce 0.38s cubic-bezier(0.34, 1.6, 0.64, 1);
+    }
+
+    @keyframes btnBounce {
+      0% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(0.94);
+      }
+      70% {
+        transform: scale(1.04);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .complete {
+      text-align: center;
+      padding: 22px 18px;
+      background: rgba(255, 252, 246, 0.55);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+    }
+
+    .complete-mascot {
+      margin: 0 auto 10px;
+      width: 80px;
+      height: auto;
+    }
+
+    .complete-mascot .complete-mascot-img {
+      margin: 0 auto;
+    }
+
+    .complete h2 {
+      margin: 0 0 8px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      font-family: var(--font-ui);
+      color: #2f4a38;
+    }
+
+    .complete p {
+      margin: 0;
+      color: #4a5e50;
+      line-height: 1.55;
+      font-weight: 600;
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+    }
+
+    .complete .big-num {
+      font-size: 1.85rem;
+      font-weight: 800;
+      font-family: var(--font-ui);
+      color: #2a6b45;
+      margin: 12px 0 8px;
+    }
+
+    .complete-mascot-img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+      filter: drop-shadow(0 4px 10px rgba(60, 90, 70, 0.15));
+    }
+
+    .auth-bar {
+      position: fixed;
+      top: max(8px, env(safe-area-inset-top));
+      right: max(10px, env(safe-area-inset-right));
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      font-family: var(--font-ui);
+    }
+
+    .auth-bar .is-hidden {
+      display: none !important;
+    }
+
+    body.is-loading .auth-bar {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .auth-btn-signin {
+      padding: 8px 12px;
+      border-radius: 14px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px solid rgba(90, 130, 95, 0.4);
+      background: linear-gradient(145deg, rgba(255, 252, 246, 0.92), rgba(220, 240, 220, 0.55));
+      color: #2f4a38;
+      box-shadow: 0 4px 14px rgba(60, 90, 70, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .auth-btn-signin:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    @media (hover: hover) {
+      .auth-btn-signin:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(60, 90, 70, 0.16);
+      }
+    }
+
+    .auth-logged-in {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px 6px 6px;
+      border-radius: 999px;
+      background: rgba(255, 252, 246, 0.55);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: 0 6px 20px rgba(60, 90, 70, 0.12);
+      max-width: min(300px, 78vw);
+    }
+
+    .auth-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(130, 170, 130, 0.45);
+      flex-shrink: 0;
+      background: rgba(200, 220, 200, 0.5);
+    }
+
+    .auth-name {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #2f4a38;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: min(120px, 28vw);
+    }
+
+    .auth-btn-out {
+      padding: 5px 10px;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      cursor: pointer;
+      border: 1px dashed rgba(120, 150, 120, 0.45);
+      background: rgba(255, 255, 255, 0.4);
+      color: #5a6b5e;
+      flex-shrink: 0;
+      transition: transform 0.12s ease, background 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (hover: hover) {
+      .auth-btn-out:hover {
+        background: rgba(255, 255, 255, 0.65);
+        transform: translateY(-2px);
+      }
+    }
+
+    .squirrel-companion {
+      position: fixed;
+      right: max(10px, env(safe-area-inset-right));
+      bottom: max(76px, calc(76px + env(safe-area-inset-bottom)));
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      pointer-events: none;
+      user-select: none;
+      max-width: min(200px, 42vw);
+      transition: opacity 0.45s ease, transform 0.35s ease;
+    }
+
+    @media (max-width: 719px) {
+      .squirrel-companion:not(.sq-sleeping) {
+        right: max(6px, env(safe-area-inset-right));
+        bottom: max(100px, calc(88px + env(safe-area-inset-bottom)));
+        max-width: min(240px, 55vw);
+      }
+    }
+
+    @media (min-width: 720px) {
+      .squirrel-companion {
+        bottom: max(20px, env(safe-area-inset-bottom));
+      }
+    }
+
+    .squirrel-companion.sq-sleeping {
+      opacity: 1;
+      align-items: center;
+      right: 50%;
+      transform: translateX(50%);
+      max-width: min(280px, 88vw);
+    }
+
+    .squirrel-companion.sq-sleeping .squirrel-stage {
+      display: none;
+    }
+
+    .squirrel-sleep-msg {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255, 252, 246, 0.78);
+      border: 1px solid rgba(200, 210, 190, 0.55);
+      box-shadow: 0 10px 28px rgba(60, 90, 70, 0.1);
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #7a8a7e;
+      opacity: 0.92;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .squirrel-companion.sq-sleeping .squirrel-sleep-msg {
+      display: block;
+    }
+
+    .squirrel-stage {
+      position: relative;
+      width: 98px;
+      height: 98px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      pointer-events: auto;
+    }
+
+    @media (max-width: 719px) {
+      .squirrel-stage {
+        width: 90px;
+        height: 90px;
+      }
+    }
+
+    .squirrel-hit {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      margin: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
+    }
+
+    .squirrel-hit:focus-visible {
+      outline: 2px solid rgba(100, 160, 120, 0.85);
+      outline-offset: 4px;
+      border-radius: 16px;
+    }
+
+    .squirrel-art {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(2px 6px 0 rgba(90, 70, 50, 0.06)) drop-shadow(0 8px 14px rgba(70, 55, 40, 0.18));
+      transform-origin: 50% 100%;
+      transition: filter 0.45s ease;
+    }
+
+    .squirrel-img-wrap {
+      width: 90px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(0);
+      animation: mascotFloat 3.8s ease-in-out infinite;
+    }
+
+    .squirrel-mascot-img {
+      width: 90px;
+      height: 90px;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.25s ease, filter 0.35s ease;
+    }
+
+    @keyframes mascotFloat {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes mascotHappyBob {
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+      }
+      50% {
+        transform: translateY(-8px) scale(1.03);
+      }
+    }
+
+    @keyframes mascotTearySway {
+      0%,
+      100% {
+        transform: translateY(0) rotate(0deg);
+      }
+      50% {
+        transform: translateY(4px) rotate(-1.5deg);
+      }
+    }
+
+    @media (hover: hover) {
+      .squirrel-companion:not(.sq-sleeping) .squirrel-hit:hover .squirrel-mascot-img {
+        transform: scale(1.05) translateY(-2px);
+      }
+    }
+
+    .squirrel-art.sq-happy .squirrel-img-wrap {
+      animation: mascotHappyBob 1.1s ease-in-out infinite;
+    }
+
+    .squirrel-art.sq-happy .squirrel-mascot-img {
+      filter: brightness(1.06) saturate(1.05) drop-shadow(0 0 12px rgba(255, 210, 150, 0.35));
+    }
+
+    .squirrel-art.sq-teary .squirrel-img-wrap {
+      animation: mascotTearySway 5s ease-in-out infinite;
+    }
+
+    .squirrel-art.sq-teary .squirrel-mascot-img {
+      filter: brightness(0.93) saturate(0.86);
+    }
+
+    .mascot-bubble {
+      position: relative;
+      max-width: min(220px, 72vw);
+      padding: 10px 14px 12px;
+      border-radius: 20px 20px 20px 8px;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 252, 246, 0.96) 100%);
+      border: 1.5px solid rgba(200, 225, 190, 0.85);
+      box-shadow: 0 4px 0 rgba(140, 180, 130, 0.25), 0 12px 28px rgba(60, 90, 70, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #3d5346;
+      line-height: 1.45;
+      opacity: 0;
+      transform: translateY(8px) scale(0.94);
+      transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.3, 0.64, 1);
+      pointer-events: none;
+      text-align: center;
+    }
+
+    .mascot-bubble::after {
+      content: "";
+      position: absolute;
+      bottom: -9px;
+      right: 22px;
+      width: 18px;
+      height: 12px;
+      background: linear-gradient(165deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 252, 246, 0.96) 100%);
+      border-right: 1.5px solid rgba(200, 225, 190, 0.85);
+      border-bottom: 1.5px solid rgba(200, 225, 190, 0.85);
+      border-radius: 0 0 6px 0;
+      transform: skewX(-12deg);
+      box-shadow: 2px 2px 0 rgba(140, 180, 130, 0.2);
+    }
+
+    .mascot-bubble.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    #confettiLayer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 200;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -12px;
+      width: 9px;
+      height: 14px;
+      border-radius: 2px;
+      opacity: 0.95;
+      animation: confettiFall var(--dur) linear var(--delay) forwards;
+    }
+
+    @keyframes confettiFall {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--tx), 110vh) rotate(var(--rot));
+        opacity: 0.85;
+      }
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+
+    .home-wrap {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .today-card-wrap {
+      position: relative;
+      padding: 2px;
+      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(125deg, #a8c4a0, #c8d9c4, #e8dfc8, #b8d4c4);
+      background-size: 200% 200%;
+      animation: rainbowBorderFlow 20s linear infinite;
+      box-shadow: 0 12px 36px rgba(60, 90, 70, 0.12);
+    }
+
+    .today-card {
+      position: relative;
+      border-radius: calc(var(--radius) + 4px);
+      padding: 12px 14px 14px;
+      background: rgba(255, 252, 246, 0.58);
+      backdrop-filter: blur(16px) saturate(1.05);
+      -webkit-backdrop-filter: blur(16px) saturate(1.05);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    .today-card h2 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: #2f4a38;
+    }
+
+    .today-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .today-stat {
+      text-align: center;
+      padding: 8px 6px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(180, 200, 175, 0.45);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    .today-stat .num {
+      font-size: 1.28rem;
+      font-weight: 800;
+      font-family: var(--font-ui);
+      color: #2a6b45;
+    }
+
+    .today-stat .lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 11px 14px;
+      border: none;
+      border-radius: 14px;
+      font-family: var(--font-ui);
+      font-size: 0.92rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: linear-gradient(145deg, #7aab82, #8fbc8f, #a8c4a0);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: 0 4px 0 rgba(70, 110, 78, 0.55), 0 10px 24px rgba(60, 100, 70, 0.18);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, filter 0.2s ease;
+    }
+
+    @media (hover: hover) {
+      .btn-primary:hover:not(:disabled) {
+        filter: brightness(1.03);
+      }
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .mode-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      text-align: left;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 16px;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: rgba(255, 252, 246, 0.48);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #2c3d33;
+      box-shadow: 0 8px 22px rgba(60, 90, 70, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+      min-height: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    @media (hover: hover) {
+      .mode-card:hover {
+        border-color: rgba(130, 170, 130, 0.55);
+        box-shadow: 0 10px 26px rgba(60, 90, 70, 0.14);
+        transform: translateY(-2px);
+      }
+    }
+
+    .mode-card:active {
+      transform: scale(0.98);
+    }
+
+    .mode-card .mode-ico {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      line-height: 1;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+
+    .mode-card .mode-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mode-card .mode-text strong {
+      display: block;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .mode-card .sub {
+      display: block;
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.35;
+    }
+
+    .home-level-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .home-level-row .filter-btn {
+      flex: 1;
+      min-width: calc(20% - 8px);
+    }
+
+    .corpus-hint-bar {
+      margin: 10px auto 0;
+      max-width: 520px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: #4a6048;
+      text-align: center;
+      line-height: 1.45;
+      background: rgba(255, 252, 246, 0.72);
+      border: 1px solid rgba(120, 160, 120, 0.35);
+      box-shadow: 0 2px 10px rgba(60, 90, 70, 0.08);
+    }
+
+    .study-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .btn-back {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-ui);
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.14);
+      color: #faf5ff;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .study-mode-tag {
+      font-size: 0.76rem;
+      font-weight: 800;
+      font-family: var(--font-ui);
+      color: #2f4a38;
+      background: rgba(255, 252, 246, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      padding: 5px 10px;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(60, 90, 70, 0.08);
+    }
+
+    .fav-restart-row {
+      width: 100%;
+      margin-bottom: 6px;
+    }
+
+    .btn-fav-restart {
+      width: 100%;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-ui);
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      background: linear-gradient(145deg, rgba(255, 251, 235, 0.95), rgba(254, 243, 199, 0.9));
+      color: #92400e;
+      border: 1px solid rgba(253, 230, 138, 0.5);
+      box-shadow: 0 3px 0 rgba(251, 191, 36, 0.35);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 520px) {
+      .card-col-left {
+        flex: 0 0 34%;
+        max-width: 40%;
+        padding-right: 8px;
+      }
+
+      .chinese {
+        font-size: 1.75rem;
+      }
+
+      .kanji-main {
+        font-size: 1.55rem;
+      }
+
+      .action-strip {
+        flex-wrap: nowrap;
+        gap: 6px;
+      }
+
+      .action-strip button {
+        font-size: 0.68rem;
+        padding: 9px 5px;
+      }
+    }
+  </style>
+</head>
+<body class="is-loading">
+  <div class="auth-bar" id="authBar" aria-label="账号">
+    <div class="auth-logged-out" id="authLoggedOut">
+      <button type="button" class="auth-btn-signin" id="btnGoogleSignIn">🔑 Google登录</button>
+    </div>
+    <div class="auth-logged-in is-hidden" id="authLoggedIn">
+      <img class="auth-avatar" id="authAvatar" width="32" height="32" alt="" />
+      <span class="auth-name" id="authName"></span>
+      <button type="button" class="auth-btn-out" id="btnSignOut">退出</button>
+    </div>
+  </div>
+  <div class="nature-scene" aria-hidden="true">
+    <div class="sun-glow"></div>
+    <div class="sun-ray"></div>
+    <div class="cloud cloud-a"></div>
+    <div class="cloud cloud-b"></div>
+    <div class="tree-silhouette t1"></div>
+    <div class="tree-silhouette t2"></div>
+  </div>
+  <div class="grass-header" aria-hidden="true"></div>
+  <div class="grass-footer" aria-hidden="true"></div>
+  <div class="ambient" aria-hidden="true">
+    <span class="ambient-leaf" style="left: 5%; animation-duration: 14s; animation-delay: 0s"></span>
+    <span class="ambient-leaf" style="left: 12%; animation-duration: 17s; animation-delay: 1.1s"></span>
+    <span class="ambient-leaf" style="left: 22%; animation-duration: 15s; animation-delay: 2.3s"></span>
+    <span class="ambient-leaf" style="left: 35%; animation-duration: 19s; animation-delay: 0.4s"></span>
+    <span class="ambient-leaf" style="left: 48%; animation-duration: 16s; animation-delay: 2.8s"></span>
+    <span class="ambient-leaf" style="left: 58%; animation-duration: 18s; animation-delay: 1.5s"></span>
+    <span class="ambient-leaf" style="left: 68%; animation-duration: 20s; animation-delay: 0.2s"></span>
+    <span class="ambient-leaf" style="left: 78%; animation-duration: 14s; animation-delay: 3.2s"></span>
+    <span class="ambient-leaf" style="left: 88%; animation-duration: 21s; animation-delay: 1.8s"></span>
+    <span class="ambient-leaf" style="left: 93%; animation-duration: 17s; animation-delay: 0.7s"></span>
+    <span class="ambient-butterfly" style="left: 18%; animation-duration: 12s; animation-delay: 0s">🦋</span>
+    <span class="ambient-butterfly" style="left: 62%; top: 28%; animation-duration: 14s; animation-delay: 2s">🦋</span>
+    <span class="ambient-butterfly" style="left: 42%; top: 35%; animation-duration: 16s; animation-delay: 4s">🦋</span>
+  </div>
+  <div id="confettiLayer" aria-hidden="true"></div>
+
+  <div class="boot-screen" id="bootScreen" aria-live="polite">
+    <div class="boot-mascot" aria-hidden="true">
+      <img class="boot-squirrel-img" src="squirrel.png" width="80" height="80" alt="" decoding="async" />
+    </div>
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <div>正在加载词库…</div>
+    <div class="boot-error is-hidden" id="bootError"></div>
+  </div>
+
+  <header class="site-header view-hidden" id="siteHeader" aria-label="站点标题">
+    <h1 class="page-title">🌿 森林里的日语小屋 🌿</h1>
+    <span class="page-title-kana">もりのなかのニホンゴ</span>
+    <div class="daily-plan-box" id="dailyPlanBox">
+      <div class="daily-plan-head">
+        <label for="dailyGoalInput">每日学习计划</label>
+        <div class="goal-chip-row" id="goalChipRow" role="group" aria-label="每日目标词数">
+          <button type="button" class="goal-chip" data-goal="10">10</button>
+          <button type="button" class="goal-chip is-active" data-goal="20">20</button>
+          <button type="button" class="goal-chip" data-goal="30">30</button>
+          <button type="button" class="goal-chip" data-goal="50">50</button>
+        </div>
+        <div class="goal-input-wrap">
+          <span>自定义</span>
+          <input type="number" id="dailyGoalInput" min="1" max="500" step="1" value="20" inputmode="numeric" aria-label="自定义每日单词数" />
+          <span>个</span>
+        </div>
+      </div>
+      <p class="daily-plan-hint">「认识」计入已掌握并推进今日目标；「不认识」仅计入已学习，并收入待复习。</p>
+      <div class="daily-plan-status" id="dailyPlanStatus">
+        今日目标：<strong id="dailyGoalDisplay">20</strong> 个已掌握单词 ｜ 已掌握：<strong id="dailyMasteredDisplay">0</strong> 个 ｜ 已学习：<strong id="dailyStudiedDisplay">0</strong> 个
+      </div>
+      <div class="daily-plan-track" id="dailyPlanTrackHeader">
+        <div class="daily-plan-fill" id="dailyPlanFillHeader"></div>
+      </div>
+    </div>
+    <p class="corpus-hint-bar view-hidden" id="corpusHintBar" role="status"></p>
+  </header>
+
+  <div class="app-layout view-hidden" id="appLayout">
+    <div class="page-wrap">
+      <div class="home-wrap view-hidden" id="homeView" aria-label="首页">
+        <div class="today-card-wrap">
+          <section class="today-card">
+            <h2>📅 今日学习</h2>
+            <div class="today-stats">
+              <div class="today-stat">
+                <div class="num" id="statNewToday">0</div>
+                <div class="lbl">今日新学</div>
+              </div>
+              <div class="today-stat">
+                <div class="num" id="statDueToday">0</div>
+                <div class="lbl">今日待复习</div>
+              </div>
+              <div class="today-stat">
+                <div class="num" id="statMastered">0</div>
+                <div class="lbl">已掌握</div>
+              </div>
+            </div>
+            <button type="button" class="btn-primary" id="btnStartDueToday">开始今日复习</button>
+          </section>
+        </div>
+        <p style="margin:0;font-size:0.78rem;font-weight:700;font-family:var(--font-ui);color:#4a6654;text-align:center">选择学习模式</p>
+        <div class="mode-grid">
+          <button type="button" class="mode-card" data-enter="new">
+            <span class="mode-ico" aria-hidden="true">📘</span>
+            <span class="mode-text"><strong>学新词</strong><span class="sub">未学过的单词，循序渐进</span></span>
+          </button>
+          <button type="button" class="mode-card" data-enter="due">
+            <span class="mode-ico" aria-hidden="true">🌅</span>
+            <span class="mode-text"><strong>今日复习</strong><span class="sub">只练今天到期的记忆曲线</span></span>
+          </button>
+          <button type="button" class="mode-card" data-enter="level">
+            <span class="mode-ico" aria-hidden="true">🎯</span>
+            <span class="mode-text"><strong>按级别</strong><span class="sub">在选定 JLPT 级别范围内混合练</span></span>
+          </button>
+          <button type="button" class="mode-card" data-enter="favorites">
+            <span class="mode-ico" aria-hidden="true">⭐</span>
+            <span class="mode-text"><strong>收藏夹</strong><span class="sub">只背你点过星星的词</span></span>
+          </button>
+          <button type="button" class="mode-card" data-enter="pending">
+            <span class="mode-ico" aria-hidden="true">🌿</span>
+            <span class="mode-text"><strong>待复习</strong><span class="sub">点过「不认识」的词</span></span>
+          </button>
+        </div>
+        <p style="margin:0;font-size:0.72rem;font-weight:600;font-family:var(--font-ui);color:#5a6b5e;text-align:center">学新词 / 按级别 使用的 JLPT 范围</p>
+        <div class="home-level-row" id="homeLevelRow" role="tablist" aria-label="首页级别">
+          <button type="button" class="filter-btn is-active" data-home-level="n1" role="tab" aria-selected="true">N1</button>
+          <button type="button" class="filter-btn" data-home-level="n2" role="tab" aria-selected="false">N2</button>
+          <button type="button" class="filter-btn" data-home-level="n3" role="tab" aria-selected="false">N3</button>
+          <button type="button" class="filter-btn" data-home-level="n4n5" role="tab" aria-selected="false">N4+N5</button>
+          <button type="button" class="filter-btn" data-home-level="all" role="tab" aria-selected="false">全部</button>
+        </div>
+      </div>
+
+  <div id="studyView" class="view-hidden">
+    <header>
+      <div class="study-top">
+        <button type="button" class="btn-back" id="btnBackHome">← 返回首页</button>
+        <span class="study-mode-tag" id="studyModeTag">学习</span>
+      </div>
+      <div class="study-daily-strip" id="studyDailyStrip">
+        <div class="daily-plan-status" id="dailyPlanStatusStudy">
+          今日目标：<strong id="dailyGoalDisplayStudy">20</strong> 个已掌握 ｜ 已掌握：<strong id="dailyMasteredDisplayStudy">0</strong> ｜ 已学习：<strong id="dailyStudiedDisplayStudy">0</strong>
+        </div>
+        <div class="daily-plan-track" id="dailyPlanTrackStudy">
+          <div class="daily-plan-fill" id="dailyPlanFillStudy"></div>
+        </div>
+      </div>
+      <div class="fav-restart-row view-hidden" id="favRestartRow">
+        <button type="button" class="btn-fav-restart" id="btnFavRestart">🔄 重新开始学习</button>
+      </div>
+      <div class="level-row view-hidden" id="levelRow" role="tablist" aria-label="级别">
+        <button type="button" class="filter-btn is-active" data-level="n1" role="tab" aria-selected="true">N1</button>
+        <button type="button" class="filter-btn" data-level="n2" role="tab" aria-selected="false">N2</button>
+        <button type="button" class="filter-btn" data-level="n3" role="tab" aria-selected="false">N3</button>
+        <button type="button" class="filter-btn" data-level="n4n5" role="tab" aria-selected="false">N4+N5</button>
+        <button type="button" class="filter-btn" data-level="all" role="tab" aria-selected="false">全部</button>
+      </div>
+      <div class="filter-row" id="filterRow" role="tablist" aria-label="词库范围">
+        <button type="button" class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">全部</button>
+        <button type="button" class="filter-btn" data-filter="hikou" role="tab" aria-selected="false">必考</button>
+        <button type="button" class="filter-btn" data-filter="jotai" role="tab" aria-selected="false">重点</button>
+      </div>
+      <div class="progress-bar" id="progressBarWrap" aria-hidden="true">
+        <div class="progress-bar-fill" id="barFill"></div>
+        <div class="progress-bar-sakura" id="sakuraBloom" aria-hidden="true">
+          <span class="sakura-petal" style="animation-delay: 0s">🌸</span>
+          <span class="sakura-petal" style="animation-delay: 0.08s">🌸</span>
+          <span class="sakura-petal" style="animation-delay: 0.16s">🌸</span>
+          <span class="sakura-petal" style="animation-delay: 0.24s">🌸</span>
+          <span class="sakura-petal" style="animation-delay: 0.32s">🌸</span>
+        </div>
+      </div>
+      <div class="progress-meta">
+        <div class="progress-count" id="progressText">
+          剩余 <span id="queueNum">0</span> · 已答 <span id="answeredNum">0</span>
+        </div>
+        <div class="stats" id="statsText">认识 <strong id="knownCount">0</strong> · 不认识 <strong id="unknownCount">0</strong></div>
+      </div>
+      <div class="study-aux-bar">
+        <button type="button" class="btn-session-reset" id="btnReset" title="清空本轮队列并重新抽取">重新本轮</button>
+      </div>
+    </header>
+
+    <main id="mainArea">
+    <div class="card-rainbow">
+      <div class="card-rainbow-inner">
+      <button type="button" class="relearn-pin" id="btnRelearn" title="重新认识本词" aria-label="重新认识本词">重学</button>
+      <button type="button" class="fav-pin" id="favBtn" aria-pressed="false" title="收藏" aria-label="收藏本词">
+        <span class="ico" id="favIcon">⭐</span>
+      </button>
+      <div class="scene-wrap">
+        <div class="star-burst" id="starBurst" aria-hidden="true"></div>
+        <div class="scene" id="scene" role="button" tabindex="0" aria-label="点击翻转卡片">
+          <div class="card" id="card">
+            <div class="face face-front">
+              <span class="face-corner tl" aria-hidden="true"></span>
+              <span class="face-corner tr" aria-hidden="true"></span>
+              <span class="face-corner bl" aria-hidden="true"></span>
+              <span class="face-corner br" aria-hidden="true"></span>
+              <div class="card-col card-col-left">
+                <span class="pos-icon-lg" id="posIconFrontLarge" aria-hidden="true">🐱</span>
+                <div class="hint">中文</div>
+                <div class="chinese" id="chineseText"></div>
+              </div>
+              <div class="card-col card-col-right">
+                <div class="tap-hint">点击卡片 · 翻转查看日语 ✨</div>
+              </div>
+            </div>
+            <div class="face face-back">
+              <span class="face-corner tl" aria-hidden="true"></span>
+              <span class="face-corner tr" aria-hidden="true"></span>
+              <span class="face-corner bl" aria-hidden="true"></span>
+              <span class="face-corner br" aria-hidden="true"></span>
+              <div class="card-col card-col-left">
+                <span class="pos-icon-lg" id="posIconBackLarge" aria-hidden="true">🐱</span>
+                <div class="hint">中文</div>
+                <div class="chinese chinese--dup" id="chineseTextBack"></div>
+              </div>
+              <div class="card-col card-col-right">
+                <div class="hint">日语详情</div>
+                <div class="back-scroll">
+                  <div class="kanji-main" id="kanjiText"></div>
+                  <div class="furigana-line" id="furiganaText"></div>
+                  <div class="meta-row">
+                    <span class="meta-tag">声调</span>
+                    <span class="meta-val" id="accentText"></span>
+                  </div>
+                  <div class="meta-row">
+                    <span class="meta-tag">词性</span>
+                    <span class="meta-val" id="vocabTypeText"></span>
+                  </div>
+                  <div class="hosoku-line" id="hosokuBlock"></div>
+                  <div class="example-block" id="ex1Block">
+                    <div class="ex-label" aria-hidden="true">🍃</div>
+                    <div class="ex-jp" id="ex1Jp"></div>
+                    <div class="ex-furi" id="ex1Furi"></div>
+                    <div class="ex-zh" id="ex1Zh"></div>
+                  </div>
+                  <div class="example-block" id="ex2Block">
+                    <div class="ex-label" aria-hidden="true">🍃</div>
+                    <div class="ex-jp" id="ex2Jp"></div>
+                    <div class="ex-furi" id="ex2Furi"></div>
+                    <div class="ex-zh" id="ex2Zh"></div>
+                  </div>
+                </div>
+                <div class="tap-hint">再点一下翻回正面</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div class="action-strip" id="actionStrip">
+      <div class="actions" id="actionRow">
+        <button type="button" class="btn-known" id="btnKnown">✅ 认识</button>
+        <button type="button" class="btn-unknown" id="btnUnknown">❌ 不认识</button>
+      </div>
+    </div>
+  </main>
+  </div>
+
+      <div class="mushroom-parade" aria-hidden="true">
+        <div class="shroom"><div class="cap dots"></div><div class="stem"></div></div>
+        <div class="shroom"><div class="cap alt"></div><div class="stem"></div></div>
+        <div class="shroom"><div class="cap dots"></div><div class="stem"></div></div>
+        <div class="shroom"><div class="cap alt dots"></div><div class="stem"></div></div>
+        <div class="shroom"><div class="cap"></div><div class="stem"></div></div>
+      </div>
+    </div>
+
+    <aside class="study-sidebar" aria-label="今日目标进度">
+      <div class="sidebar-stick" id="sidebarStick">
+        <div class="sidebar-tree" aria-hidden="true">
+          <svg width="30" height="34" viewBox="0 0 30 34" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#5d8a6e" d="M15 1l9 14h-5l7 11H4l7-11H6z" />
+            <rect x="12.5" y="22" width="5" height="11" rx="1.2" fill="#6d4c41" />
+          </svg>
+        </div>
+        <div class="sidebar-pct" id="sidebarPct">0%</div>
+        <div class="sidebar-line" id="sidebarGoalLine">今日目标 20</div>
+        <div class="sidebar-line" id="sidebarDoneLine">已掌握 0</div>
+        <div class="sidebar-bar-track" aria-hidden="true">
+          <div class="sidebar-bar-fill" id="sidebarBarFill"></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="squirrel-companion" id="mascot" aria-hidden="true">
+    <div class="mascot-bubble" id="mascotBubble" role="status"></div>
+    <div class="squirrel-sleep-msg" id="squirrelSleepMsg">小松鼠需要松果啦，快回来学习吧~</div>
+    <div class="squirrel-stage">
+      <button type="button" class="squirrel-hit" id="squirrelHit" aria-label="摸摸小松鼠，听听鼓励">
+        <div class="squirrel-art" id="squirrelArt" title="小松鼠">
+          <div class="squirrel-img-wrap" aria-hidden="true">
+            <img
+              class="squirrel-mascot-img"
+              src="squirrel.png"
+              width="90"
+              height="90"
+              alt=""
+              decoding="async"
+            />
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const URL_N1 = "words_n1.json";
+    const URL_N2 = "words_n2.json";
+    const URL_N3 = "words_n3.json";
+    const URL_N4 = "words_n4.json";
+    const URL_N5 = "words_n5.json";
+
+    // =============================================================================
+    // Firebase：Authentication（Google）+ Realtime Database
+    // 路径：users/{uid}/progress | favorites | studyLog（及 meta：每日计划、待复习、会话）
+    // 未登录仅用 localStorage；登录后拉取 RTDB 覆盖写入 localStorage；变更后 2s 防抖写回 RTDB
+    // RTDB 规则示例（根下 users）：
+    // {
+    //   "rules": {
+    //     "users": {
+    //       "$uid": {
+    //         ".read": "auth != null && auth.uid == $uid",
+    //         ".write": "auth != null && auth.uid == $uid"
+    //       }
+    //     }
+    //   }
+    // }
+    // =============================================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyA08FMntvqszNWtUDNJOjEiIP8VjCHXflU",
+      authDomain: "japanese-study-dxj.firebaseapp.com",
+      databaseURL: "https://japanese-study-dxj-default-rtdb.firebaseio.com",
+      projectId: "japanese-study-dxj",
+      storageBucket: "japanese-study-dxj.firebasestorage.app",
+      messagingSenderId: "15102852500",
+      appId: "1:15102852500:web:0db4978932136ef0666381"
+    };
+
+    const COMPLETE_MASCOT_IMG =
+      '<div class="complete-mascot" aria-hidden="true"><img class="complete-mascot-img" src="squirrel.png" width="80" height="80" alt="" decoding="async" /></div>';
+
+    const LS_FAVORITES = "favorites";
+    const LS_STUDY_LOG = "study_log";
+    const LS_STUDY_SESSION = "study_session";
+    const LEGACY_V4 = "jp_vocab_memory_v4";
+    const LS_DAILY_STATE = "daily_plan_state_v1";
+    const LS_PENDING_REVIEW = "pending_review_wkeys_v1";
+    const REVIEW_GAP = 5;
+    const INTERVALS = [1, 2, 4, 7, 15, 30];
+
+    const CAT = { all: "all", hikou: "hikou", jotai: "jotai" };
+    const VALID_LEVEL_SELECT = new Set(["n1", "n2", "n3", "n4n5", "all"]);
+
+    const corpus = { n1: [], n2: [], n3: [], n4: [], n5: [] };
+    let idMap = new Map();
+    /** @type {{ n1: number; n2: number; n3: number; n4: number; n5: number }} */
+    let corpusSig = { n1: 0, n2: 0, n3: 0, n4: 0, n5: 0 };
+
+    /** @type {'n1'|'n2'|'n3'|'n4n5'|'all'} */
+    let levelMode = "n1";
+    /** @type {'n1'|'n2'|'n3'|'n4n5'|'all'} */
+    let homeLevel = "n1";
+    /** @type {'new'|'due'|'level'|'favorites'|'pending'} */
+    let learnMode = "new";
+
+    let activeFilter = CAT.all;
+    let sessionBucket = { queue: [], known: 0, unknown: 0 };
+    let favoriteSet = new Set();
+    /** @type {Set<string>} */
+    let pendingReviewSet = new Set();
+    const progressMem = new Map();
+
+    let flipped = false;
+    let mascotTimer = null;
+    let renderCardDelayTimer = null;
+
+    const scene = document.getElementById("scene");
+    const starBurst = document.getElementById("starBurst");
+    const chineseText = document.getElementById("chineseText");
+    const chineseTextBack = document.getElementById("chineseTextBack");
+    const kanjiText = document.getElementById("kanjiText");
+    const furiganaText = document.getElementById("furiganaText");
+    const accentText = document.getElementById("accentText");
+    const vocabTypeText = document.getElementById("vocabTypeText");
+    const hosokuBlock = document.getElementById("hosokuBlock");
+    const ex1Block = document.getElementById("ex1Block");
+    const ex2Block = document.getElementById("ex2Block");
+    const ex1Jp = document.getElementById("ex1Jp");
+    const ex1Furi = document.getElementById("ex1Furi");
+    const ex1Zh = document.getElementById("ex1Zh");
+    const ex2Jp = document.getElementById("ex2Jp");
+    const ex2Furi = document.getElementById("ex2Furi");
+    const ex2Zh = document.getElementById("ex2Zh");
+    const queueNum = document.getElementById("queueNum");
+    const answeredNum = document.getElementById("answeredNum");
+    const barFill = document.getElementById("barFill");
+    const progressBarWrap = document.getElementById("progressBarWrap");
+    const posIconFrontLarge = document.getElementById("posIconFrontLarge");
+    const posIconBackLarge = document.getElementById("posIconBackLarge");
+    const knownCountEl = document.getElementById("knownCount");
+    const unknownCountEl = document.getElementById("unknownCount");
+    const btnKnown = document.getElementById("btnKnown");
+    const btnUnknown = document.getElementById("btnUnknown");
+    const btnReset = document.getElementById("btnReset");
+    const btnRelearn = document.getElementById("btnRelearn");
+    const mainArea = document.getElementById("mainArea");
+    const actionRow = document.getElementById("actionRow");
+    const actionStrip = document.getElementById("actionStrip");
+    const sidebarBarFill = document.getElementById("sidebarBarFill");
+    const sidebarPct = document.getElementById("sidebarPct");
+    const sidebarStick = document.getElementById("sidebarStick");
+    const sidebarGoalLine = document.getElementById("sidebarGoalLine");
+    const sidebarDoneLine = document.getElementById("sidebarDoneLine");
+    const siteHeader = document.getElementById("siteHeader");
+    const corpusHintBar = document.getElementById("corpusHintBar");
+    const appLayout = document.getElementById("appLayout");
+    const confettiLayer = document.getElementById("confettiLayer");
+    const mascot = document.getElementById("mascot");
+    const mascotBubble = document.getElementById("mascotBubble");
+    const bootScreen = document.getElementById("bootScreen");
+    const bootError = document.getElementById("bootError");
+    const filterRow = document.getElementById("filterRow");
+    const levelRow = document.getElementById("levelRow");
+    const favBtn = document.getElementById("favBtn");
+    const favIcon = document.getElementById("favIcon");
+    const homeView = document.getElementById("homeView");
+    const studyView = document.getElementById("studyView");
+    const statNewToday = document.getElementById("statNewToday");
+    const statDueToday = document.getElementById("statDueToday");
+    const statMastered = document.getElementById("statMastered");
+    const btnStartDueToday = document.getElementById("btnStartDueToday");
+    const homeLevelRow = document.getElementById("homeLevelRow");
+    const btnBackHome = document.getElementById("btnBackHome");
+    const studyModeTag = document.getElementById("studyModeTag");
+    const favRestartRow = document.getElementById("favRestartRow");
+    const btnFavRestart = document.getElementById("btnFavRestart");
+    const dailyGoalInput = document.getElementById("dailyGoalInput");
+    const goalChipRow = document.getElementById("goalChipRow");
+    const dailyGoalDisplay = document.getElementById("dailyGoalDisplay");
+    const dailyMasteredDisplay = document.getElementById("dailyMasteredDisplay");
+    const dailyStudiedDisplay = document.getElementById("dailyStudiedDisplay");
+    const dailyPlanFillHeader = document.getElementById("dailyPlanFillHeader");
+    const dailyPlanTrackHeader = document.getElementById("dailyPlanTrackHeader");
+    const dailyGoalDisplayStudy = document.getElementById("dailyGoalDisplayStudy");
+    const dailyMasteredDisplayStudy = document.getElementById("dailyMasteredDisplayStudy");
+    const dailyStudiedDisplayStudy = document.getElementById("dailyStudiedDisplayStudy");
+    const dailyPlanFillStudy = document.getElementById("dailyPlanFillStudy");
+    const dailyPlanTrackStudy = document.getElementById("dailyPlanTrackStudy");
+    const dailyPlanBox = document.getElementById("dailyPlanBox");
+    const squirrelArt = document.getElementById("squirrelArt");
+    const squirrelHit = document.getElementById("squirrelHit");
+
+    const ENCOURAGE_MSGS = [
+      "加油！你已经背了好多了🌸",
+      "休息一下再继续吧～",
+      "你最棒了！✨",
+      "慢慢来，记忆会越来越牢的💜",
+      "今天也超努力呢！🌟",
+      "喝口水，给小脑瓜充充电～",
+      "坚持就是胜利，我陪你！",
+      "错几次没关系，重要的是不放弃💪",
+      "你已经比昨天更厉害啦！",
+      "学完奖励自己一颗糖吧🍬"
+    ];
+
+    let audioCtx = null;
+    let encourageInterval = null;
+    let encourageHideTimer = null;
+    let cloudSaveTimer = null;
+    let suppressCloudSchedule = 0;
+    let firebaseUser = null;
+    const CLOUD_SAVE_DELAY_MS = 2000;
+
+    function audioResume() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
+    }
+
+    function beep(freq, dur, type, vol) {
+      try {
+        audioResume();
+        const ctx = audioCtx;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = type || "sine";
+        o.frequency.setValueAtTime(freq, ctx.currentTime);
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(vol != null ? vol : 0.12, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(ctx.currentTime);
+        o.stop(ctx.currentTime + dur + 0.04);
+      } catch (_) {}
+    }
+
+    function playDing() {
+      beep(1046.5, 0.1, "sine", 0.13);
+    }
+
+    function playThud() {
+      beep(155, 0.24, "sine", 0.09);
+    }
+
+    function playMagic() {
+      try {
+        audioResume();
+        const ctx = audioCtx;
+        const t0 = ctx.currentTime + 0.01;
+        [523.25, 659.25, 783.99].forEach((f, i) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "triangle";
+          o.frequency.value = f;
+          const st = t0 + i * 0.08;
+          g.gain.setValueAtTime(0, st);
+          g.gain.linearRampToValueAtTime(0.09, st + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, st + 0.22);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(st);
+          o.stop(st + 0.26);
+        });
+      } catch (_) {}
+    }
+
+    function playSwoosh() {
+      try {
+        audioResume();
+        const ctx = audioCtx;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        const f = ctx.createBiquadFilter();
+        f.type = "lowpass";
+        f.frequency.setValueAtTime(1100, ctx.currentTime);
+        f.frequency.exponentialRampToValueAtTime(380, ctx.currentTime + 0.11);
+        o.type = "triangle";
+        o.frequency.setValueAtTime(480, ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.1);
+        g.gain.setValueAtTime(0, ctx.currentTime);
+        g.gain.linearRampToValueAtTime(0.055, ctx.currentTime + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.13);
+        o.connect(f);
+        f.connect(g);
+        g.connect(ctx.destination);
+        o.start(ctx.currentTime);
+        o.stop(ctx.currentTime + 0.15);
+      } catch (_) {}
+    }
+
+    function playVictory() {
+      const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+      try {
+        audioResume();
+        const ctx = audioCtx;
+        let t = ctx.currentTime + 0.02;
+        notes.forEach((freq) => {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "sine";
+          o.frequency.value = freq;
+          g.gain.setValueAtTime(0, t);
+          g.gain.linearRampToValueAtTime(0.1, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.26);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(t);
+          o.stop(t + 0.3);
+          t += 0.13;
+        });
+      } catch (_) {}
+    }
+
+    function posIconFromVocabType(vt) {
+      const s = vt != null ? String(vt) : "";
+      if (/擬|オノ|象声|擬態/.test(s)) return "🎵";
+      if (/副/.test(s) && !/擬/.test(s)) return "🐬";
+      if (/名|代|数/.test(s)) return "🐰";
+      if (/動|る|段|サ变|自五|他五|自他|他動|自動|ずる|じ/.test(s)) return "🦊";
+      if (/形|ナ|イ形|い形|形容/.test(s)) return "🌸";
+      return "🐱";
+    }
+
+    function setPosBadges(icon) {
+      const ico = icon || "🐱";
+      if (posIconFrontLarge) posIconFrontLarge.textContent = ico;
+      if (posIconBackLarge) posIconBackLarge.textContent = ico;
+    }
+
+    function updateSidebarPanel(pct, goal, mastered) {
+      const p = Math.max(0, Math.min(100, pct));
+      if (sidebarBarFill) sidebarBarFill.style.height = p + "%";
+      if (sidebarPct) sidebarPct.textContent = Math.round(p) + "%";
+      if (sidebarGoalLine) sidebarGoalLine.textContent = "今日目标 " + goal;
+      if (sidebarDoneLine) sidebarDoneLine.textContent = "已掌握 " + mastered;
+      const done = goal > 0 && mastered >= goal;
+      if (sidebarStick) sidebarStick.classList.toggle("sidebar-complete", done);
+    }
+
+    function showEncourageTip() {
+      if (mascot.classList.contains("sq-sleeping")) return;
+      clearTimeout(encourageHideTimer);
+      mascotBubble.textContent = ENCOURAGE_MSGS[Math.floor(Math.random() * ENCOURAGE_MSGS.length)];
+      mascotBubble.classList.add("show");
+      encourageHideTimer = setTimeout(() => {
+        mascotBubble.classList.remove("show");
+        setTimeout(() => {
+          if (!mascotBubble.classList.contains("show")) mascotBubble.textContent = "";
+        }, 250);
+      }, 3200);
+    }
+
+    function startEncourageLoop() {
+      if (encourageInterval) clearInterval(encourageInterval);
+      encourageInterval = setInterval(showEncourageTip, 30000);
+    }
+
+    function wordKey(w) {
+      return `${w._lv}:${w.id}`;
+    }
+
+    function progressStorageKey(wk) {
+      return `word_progress_${String(wk).replace(":", "_")}`;
+    }
+
+    function defaultProgress() {
+      return { step: 0, nextReview: null, mastered: false };
+    }
+
+    function parseProgress(raw) {
+      try {
+        const o = JSON.parse(raw);
+        return {
+          step: Math.max(0, Math.min(6, Number(o.step) || 0)),
+          nextReview: o.nextReview != null ? String(o.nextReview) : null,
+          mastered: !!o.mastered
+        };
+      } catch {
+        return defaultProgress();
+      }
+    }
+
+    function normalizeFirestoreProgress(val) {
+      if (!val || typeof val !== "object") return defaultProgress();
+      return {
+        step: Math.max(0, Math.min(6, Number(val.step) || 0)),
+        nextReview: val.nextReview != null ? String(val.nextReview) : null,
+        mastered: !!val.mastered
+      };
+    }
+
+    function getWordProgress(wk) {
+      if (progressMem.has(wk)) return { ...progressMem.get(wk) };
+      const raw = localStorage.getItem(progressStorageKey(wk));
+      const p = raw ? parseProgress(raw) : defaultProgress();
+      progressMem.set(wk, p);
+      return { ...p };
+    }
+
+    function setWordProgress(wk, p) {
+      progressMem.set(wk, { ...p });
+      localStorage.setItem(progressStorageKey(wk), JSON.stringify(p));
+      bumpCloudSaveSchedule();
+    }
+
+    function loadAllProgressKeysFromLS() {
+      progressMem.clear();
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith("word_progress_")) continue;
+        const suffix = k.slice("word_progress_".length);
+        const us = suffix.indexOf("_");
+        if (us === -1) continue;
+        const wk = suffix.slice(0, us) + ":" + suffix.slice(us + 1);
+        const raw = localStorage.getItem(k);
+        progressMem.set(wk, raw ? parseProgress(raw) : defaultProgress());
+      }
+    }
+
+    function todayStr() {
+      const d = new Date();
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function daysBetweenDates(a, b) {
+      const [y1, m1, d1] = String(a).split("-").map(Number);
+      const [y2, m2, d2] = String(b).split("-").map(Number);
+      const u1 = Date.UTC(y1, m1 - 1, d1);
+      const u2 = Date.UTC(y2, m2 - 1, d2);
+      return Math.round((u2 - u1) / 86400000);
+    }
+
+    function defaultDailyState() {
+      return {
+        goal: 20,
+        todayDate: null,
+        todayMastered: 0,
+        todayStudied: 0,
+        consecutiveMiss: 0,
+        squirrelAsleep: false
+      };
+    }
+
+    function normalizeDailyState(o) {
+      if (!o || typeof o !== "object") return defaultDailyState();
+      let tm = Number(o.todayMastered);
+      let ts = Number(o.todayStudied);
+      if (!Number.isFinite(tm)) {
+        const legacy = Number(o.todayAnswered);
+        tm = Number.isFinite(legacy) ? Math.max(0, legacy) : 0;
+      }
+      if (!Number.isFinite(ts)) ts = tm;
+      return {
+        goal: Math.max(1, Math.min(500, Number(o.goal) || 20)),
+        todayDate: o.todayDate != null ? String(o.todayDate) : null,
+        todayMastered: Math.max(0, tm),
+        todayStudied: Math.max(0, ts),
+        consecutiveMiss: Math.max(0, Number(o.consecutiveMiss) || 0),
+        squirrelAsleep: !!o.squirrelAsleep
+      };
+    }
+
+    function loadDailyState() {
+      try {
+        const raw = localStorage.getItem(LS_DAILY_STATE);
+        if (!raw) return defaultDailyState();
+        return normalizeDailyState(JSON.parse(raw));
+      } catch {
+        return defaultDailyState();
+      }
+    }
+
+    function saveDailyState(s) {
+      localStorage.setItem(LS_DAILY_STATE, JSON.stringify(normalizeDailyState(s)));
+      bumpCloudSaveSchedule();
+    }
+
+    function rolloverDailyStateIfNeeded() {
+      const t = todayStr();
+      let s = loadDailyState();
+      if (!s.todayDate) {
+        s.todayDate = t;
+        s.todayMastered = 0;
+        s.todayStudied = 0;
+        if (s.consecutiveMiss >= 7) s.squirrelAsleep = true;
+        saveDailyState(s);
+        return s;
+      }
+      if (s.todayDate === t) {
+        if (s.consecutiveMiss >= 7) s.squirrelAsleep = true;
+        saveDailyState(s);
+        return s;
+      }
+      const diff = daysBetweenDates(s.todayDate, t);
+      if (diff <= 0) {
+        s.todayDate = t;
+        saveDailyState(s);
+        return s;
+      }
+      const met = s.todayMastered >= s.goal;
+      if (!met) s.consecutiveMiss++;
+      else s.consecutiveMiss = 0;
+      if (diff > 1) s.consecutiveMiss += diff - 1;
+      s.todayDate = t;
+      s.todayMastered = 0;
+      s.todayStudied = 0;
+      if (s.consecutiveMiss >= 7) s.squirrelAsleep = true;
+      saveDailyState(s);
+      return s;
+    }
+
+    function setDailyGoal(n) {
+      let s = rolloverDailyStateIfNeeded();
+      const g = Math.max(1, Math.min(500, Number(n) || 20));
+      s.goal = g;
+      saveDailyState(s);
+      syncGoalControls(g);
+      updateDailyPlanUI();
+      updateSquirrelCompanion();
+    }
+
+    function syncGoalControls(goal) {
+      const g = Math.max(1, Math.min(500, goal));
+      if (dailyGoalInput) dailyGoalInput.value = String(g);
+      if (goalChipRow) {
+        goalChipRow.querySelectorAll(".goal-chip").forEach((btn) => {
+          const v = Number(btn.getAttribute("data-goal"));
+          btn.classList.toggle("is-active", v === g);
+        });
+      }
+    }
+
+    function updateDailyPlanUI() {
+      const s = rolloverDailyStateIfNeeded();
+      const goal = s.goal;
+      const mastered = s.todayMastered;
+      const studied = s.todayStudied;
+      const pct = goal <= 0 ? 0 : Math.min(100, (100 * mastered) / goal);
+      if (dailyGoalDisplay) dailyGoalDisplay.textContent = String(goal);
+      if (dailyMasteredDisplay) dailyMasteredDisplay.textContent = String(mastered);
+      if (dailyStudiedDisplay) dailyStudiedDisplay.textContent = String(studied);
+      if (dailyGoalDisplayStudy) dailyGoalDisplayStudy.textContent = String(goal);
+      if (dailyMasteredDisplayStudy) dailyMasteredDisplayStudy.textContent = String(mastered);
+      if (dailyStudiedDisplayStudy) dailyStudiedDisplayStudy.textContent = String(studied);
+      if (dailyPlanFillHeader) dailyPlanFillHeader.style.width = pct + "%";
+      if (dailyPlanFillStudy) dailyPlanFillStudy.style.width = pct + "%";
+      if (dailyPlanTrackHeader) dailyPlanTrackHeader.classList.toggle("is-full", mastered >= goal);
+      if (dailyPlanTrackStudy) dailyPlanTrackStudy.classList.toggle("is-full", mastered >= goal);
+      updateSidebarPanel(pct, goal, mastered);
+      if (dailyPlanBox) dailyPlanBox.classList.toggle("daily-plan-celebrate", goal > 0 && mastered >= goal);
+    }
+
+    function wakeSquirrelIfSleeping() {
+      let s = rolloverDailyStateIfNeeded();
+      if (!s.squirrelAsleep) return;
+      s.squirrelAsleep = false;
+      s.consecutiveMiss = 0;
+      saveDailyState(s);
+    }
+
+    function bumpDailyStudied() {
+      wakeSquirrelIfSleeping();
+      let s = rolloverDailyStateIfNeeded();
+      s.todayStudied = (Number(s.todayStudied) || 0) + 1;
+      saveDailyState(s);
+      updateDailyPlanUI();
+      updateSquirrelCompanion();
+    }
+
+    function bumpDailyMastered() {
+      wakeSquirrelIfSleeping();
+      let s = rolloverDailyStateIfNeeded();
+      s.todayMastered = (Number(s.todayMastered) || 0) + 1;
+      s.todayStudied = (Number(s.todayStudied) || 0) + 1;
+      saveDailyState(s);
+      updateDailyPlanUI();
+      updateSquirrelCompanion();
+    }
+
+    function updateSquirrelCompanion() {
+      if (!mascot || !squirrelArt) return;
+      const s = loadDailyState();
+      squirrelArt.classList.remove("sq-happy", "sq-teary");
+      if (s.squirrelAsleep) {
+        mascot.classList.add("sq-sleeping");
+        return;
+      }
+      mascot.classList.remove("sq-sleeping");
+      const met = s.todayDate === todayStr() && s.todayMastered >= s.goal;
+      if (met) {
+        squirrelArt.classList.add("sq-happy");
+      } else if (s.consecutiveMiss >= 2) {
+        squirrelArt.classList.add("sq-teary");
+      }
+    }
+
+    function addDays(dateStr, n) {
+      const [y, mo, da] = dateStr.split("-").map(Number);
+      const dt = new Date(y, mo - 1, da);
+      dt.setDate(dt.getDate() + n);
+      const yy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, "0");
+      const dd = String(dt.getDate()).padStart(2, "0");
+      return `${yy}-${mm}-${dd}`;
+    }
+
+    function loadFavoritesFromLS() {
+      try {
+        const raw = localStorage.getItem(LS_FAVORITES);
+        if (!raw) return new Set();
+        const a = JSON.parse(raw);
+        return new Set(Array.isArray(a) ? a.map(String) : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function saveFavoritesToLS() {
+      localStorage.setItem(LS_FAVORITES, JSON.stringify(Array.from(favoriteSet)));
+      bumpCloudSaveSchedule();
+    }
+
+    function loadPendingReviewFromLS() {
+      try {
+        const raw = localStorage.getItem(LS_PENDING_REVIEW);
+        const a = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(a) ? a.filter(Boolean).map(String) : []);
+      } catch {
+        return new Set();
+      }
+    }
+
+    function savePendingReviewToLS() {
+      localStorage.setItem(LS_PENDING_REVIEW, JSON.stringify(Array.from(pendingReviewSet)));
+      bumpCloudSaveSchedule();
+    }
+
+    function addPendingReview(wk) {
+      pendingReviewSet.add(String(wk));
+      savePendingReviewToLS();
+    }
+
+    function removePendingReview(wk) {
+      pendingReviewSet.delete(String(wk));
+      savePendingReviewToLS();
+    }
+
+    function migrateLegacyFavorites() {
+      if (localStorage.getItem(LS_FAVORITES)) return;
+      try {
+        const raw = localStorage.getItem(LEGACY_V4);
+        if (!raw) return;
+        const o = JSON.parse(raw);
+        if (o.favorites && Array.isArray(o.favorites)) {
+          localStorage.setItem(LS_FAVORITES, JSON.stringify(o.favorites.map(String)));
+        }
+      } catch {}
+    }
+
+    function getStudyLog() {
+      try {
+        const raw = localStorage.getItem(LS_STUDY_LOG);
+        if (!raw) return {};
+        const o = JSON.parse(raw);
+        return typeof o === "object" && o ? o : {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveStudyLog(log) {
+      localStorage.setItem(LS_STUDY_LOG, JSON.stringify(log));
+      bumpCloudSaveSchedule();
+    }
+
+    function bumpNewLearnToday() {
+      const t = todayStr();
+      const log = getStudyLog();
+      if (!log[t]) log[t] = { newLearn: 0, review: 0 };
+      log[t].newLearn = (Number(log[t].newLearn) || 0) + 1;
+      saveStudyLog(log);
+    }
+
+    function bumpReviewToday() {
+      const t = todayStr();
+      const log = getStudyLog();
+      if (!log[t]) log[t] = { newLearn: 0, review: 0 };
+      log[t].review = (Number(log[t].review) || 0) + 1;
+      saveStudyLog(log);
+    }
+
+    function getTodayNewLearnCount() {
+      const t = todayStr();
+      const log = getStudyLog();
+      return log[t] ? Number(log[t].newLearn) || 0 : 0;
+    }
+
+    function saveSession() {
+      const payload = {
+        learnMode,
+        levelMode,
+        activeFilter,
+        queue: sessionBucket.queue.slice(),
+        known: sessionBucket.known,
+        unknown: sessionBucket.unknown,
+        corpusSig: { ...corpusSig }
+      };
+      localStorage.setItem(LS_STUDY_SESSION, JSON.stringify(payload));
+      bumpCloudSaveSchedule();
+    }
+
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(LS_STUDY_SESSION);
+        if (!raw) return null;
+        const o = JSON.parse(raw);
+        if (!corpusSigMatchesStored(o.corpusSig)) return null;
+        return o;
+      } catch {
+        return null;
+      }
+    }
+
+    function matchesSubFilter(w, sub) {
+      if (sub === CAT.all) return true;
+      const c = w.category != null ? String(w.category) : "";
+      if (sub === CAT.hikou) return c.includes("必考");
+      if (sub === CAT.jotai) return c.includes("重点");
+      return true;
+    }
+
+    function wordsForLevel(lv) {
+      if (lv === "n1") return corpus.n1;
+      if (lv === "n2") return corpus.n2;
+      if (lv === "n3") return corpus.n3;
+      if (lv === "n4n5") return corpus.n4.concat(corpus.n5);
+      if (lv === "all") return corpus.n1.concat(corpus.n2, corpus.n3, corpus.n4, corpus.n5);
+      return corpus.n1;
+    }
+
+    function corpusSigMatchesStored(stored) {
+      if (!stored || typeof stored !== "object") return false;
+      const keys = ["n1", "n2", "n3", "n4", "n5"];
+      for (const k of keys) {
+        if (Number(stored[k]) !== Number(corpusSig[k])) return false;
+      }
+      return true;
+    }
+
+    function isDueWord(wk, today) {
+      const p = getWordProgress(wk);
+      if (p.mastered) return false;
+      if (p.step < 1) return false;
+      return !!(p.nextReview && p.nextReview <= today);
+    }
+
+    function countDueToday() {
+      const t = todayStr();
+      let n = 0;
+      for (const wk of idMap.keys()) {
+        if (isDueWord(wk, t)) n++;
+      }
+      return n;
+    }
+
+    function countMastered() {
+      let n = 0;
+      for (const wk of idMap.keys()) {
+        if (getWordProgress(wk).mastered) n++;
+      }
+      return n;
+    }
+
+    function refreshHomeStats() {
+      statNewToday.textContent = String(getTodayNewLearnCount());
+      const due = countDueToday();
+      statDueToday.textContent = String(due);
+      statMastered.textContent = String(countMastered());
+      btnStartDueToday.disabled = due === 0;
+      updateDailyPlanUI();
+    }
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function buildQueueKeys() {
+      const t = todayStr();
+      let list = [];
+      if (learnMode === "new") {
+        for (const w of wordsForLevel(levelMode)) {
+          const wk = wordKey(w);
+          const p = getWordProgress(wk);
+          if (!p.mastered && p.step === 0 && matchesSubFilter(w, activeFilter)) list.push(wk);
+        }
+      } else if (learnMode === "due") {
+        for (const w of wordsForLevel("all")) {
+          const wk = wordKey(w);
+          if (isDueWord(wk, t) && matchesSubFilter(w, activeFilter)) list.push(wk);
+        }
+      } else if (learnMode === "level") {
+        for (const w of wordsForLevel(levelMode)) {
+          const wk = wordKey(w);
+          const p = getWordProgress(wk);
+          if (!p.mastered && matchesSubFilter(w, activeFilter)) list.push(wk);
+        }
+      } else if (learnMode === "favorites") {
+        for (const wk of favoriteSet) {
+          const w = idMap.get(wk);
+          if (!w) continue;
+          const p = getWordProgress(wk);
+          if (!p.mastered && matchesSubFilter(w, activeFilter)) list.push(wk);
+        }
+      } else if (learnMode === "pending") {
+        for (const wk of pendingReviewSet) {
+          const w = idMap.get(String(wk));
+          if (!w) continue;
+          const p = getWordProgress(wk);
+          if (!p.mastered && matchesSubFilter(w, activeFilter)) list.push(String(wk));
+        }
+      }
+      return shuffle(list);
+    }
+
+    function startSessionFromMode(mode, useHomeLevel) {
+      learnMode = mode;
+      if (useHomeLevel) levelMode = homeLevel;
+      if (mode === "due") {
+        levelMode = "all";
+      }
+      activeFilter = CAT.all;
+      sessionBucket = { queue: buildQueueKeys(), known: 0, unknown: 0 };
+      setFilterUI();
+      setLevelUI();
+      updateStudyChrome();
+      saveSession();
+      showStudyView();
+      render();
+    }
+
+    function showHomeView() {
+      cancelPendingCardPaint();
+      saveSession();
+      if (siteHeader) siteHeader.classList.remove("view-hidden");
+      if (appLayout) appLayout.classList.remove("view-hidden");
+      homeView.classList.remove("view-hidden");
+      studyView.classList.add("view-hidden");
+      refreshHomeStats();
+    }
+
+    function showStudyView() {
+      if (siteHeader) siteHeader.classList.remove("view-hidden");
+      if (appLayout) appLayout.classList.remove("view-hidden");
+      homeView.classList.add("view-hidden");
+      studyView.classList.remove("view-hidden");
+    }
+
+    function isFirebaseConfigured() {
+      const k = firebaseConfig && String(firebaseConfig.apiKey || "");
+      return k.length > 0 && !k.includes("YOUR_API_KEY");
+    }
+
+    function getFirebaseRtdb() {
+      try {
+        if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return null;
+        if (typeof firebase.database === "function") return firebase.database();
+      } catch (_) {}
+      return null;
+    }
+
+    function bumpCloudSaveSchedule() {
+      if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+      if (!getFirebaseRtdb()) return;
+      if (!isFirebaseConfigured() || !firebaseUser || suppressCloudSchedule > 0) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = setTimeout(() => {
+        cloudSaveTimer = null;
+        if (!firebase.apps.length) return;
+        const u = firebase.auth().currentUser;
+        if (!u) return;
+        writeUserRealtimeDb(u.uid).catch((e) => console.error("Cloud save failed", e));
+      }, CLOUD_SAVE_DELAY_MS);
+    }
+
+    async function flushCloudSaveNow() {
+      if (typeof firebase === "undefined" || !firebase.apps || !firebase.apps.length) return;
+      if (!getFirebaseRtdb()) return;
+      if (!isFirebaseConfigured()) return;
+      const u = firebase.auth().currentUser;
+      if (!u) return;
+      clearTimeout(cloudSaveTimer);
+      cloudSaveTimer = null;
+      try {
+        await writeUserRealtimeDb(u.uid);
+      } catch (e) {
+        console.error("Cloud flush failed", e);
+      }
+    }
+
+    function collectProgressMapForCloud() {
+      const progress = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (!k || !k.startsWith("word_progress_")) continue;
+        const suffix = k.slice("word_progress_".length);
+        const us = suffix.indexOf("_");
+        if (us === -1) continue;
+        const wk = suffix.slice(0, us) + ":" + suffix.slice(us + 1);
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        try {
+          progress[wk] = parseProgress(raw);
+        } catch (_) {}
+      }
+      return progress;
+    }
+
+    async function writeUserRealtimeDb(uid) {
+      const rtdb = getFirebaseRtdb();
+      if (!rtdb) return;
+      const progress = collectProgressMapForCloud();
+      let studySession = null;
+      try {
+        const raw = localStorage.getItem(LS_STUDY_SESSION);
+        studySession = raw ? JSON.parse(raw) : null;
+      } catch (_) {
+        studySession = null;
+      }
+      const payload = {
+        progress,
+        favorites: Array.from(favoriteSet),
+        studyLog: getStudyLog(),
+        meta: {
+          dailyPlanState: loadDailyState(),
+          pendingReview: Array.from(pendingReviewSet),
+          studySession
+        },
+        updatedAt: firebase.database.ServerValue.TIMESTAMP
+      };
+      await rtdb.ref("users/" + uid).update(payload);
+    }
+
+    /**
+     * @param {Record<string, unknown>} data
+     * @param {{ progress?: boolean; favorites?: boolean; studyLog?: boolean; meta?: boolean }} [which]
+     */
+    function applyRtdbUserSnapshot(data, which) {
+      if (!data || typeof data !== "object") return;
+      const w = which || {
+        progress: true,
+        favorites: true,
+        studyLog: true,
+        meta: true
+      };
+      suppressCloudSchedule++;
+      try {
+        if (
+          w.progress &&
+          data.progress != null &&
+          typeof data.progress === "object" &&
+          Object.keys(data.progress).length > 0
+        ) {
+          const toRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith("word_progress_")) toRemove.push(k);
+          }
+          toRemove.forEach((k) => localStorage.removeItem(k));
+          progressMem.clear();
+          for (const [wk, val] of Object.entries(data.progress)) {
+            const p = normalizeFirestoreProgress(val);
+            progressMem.set(wk, p);
+            localStorage.setItem(progressStorageKey(wk), JSON.stringify(p));
+          }
+        }
+
+        if (w.favorites && Array.isArray(data.favorites)) {
+          favoriteSet = new Set(data.favorites.map(String));
+          localStorage.setItem(LS_FAVORITES, JSON.stringify(Array.from(favoriteSet)));
+        }
+
+        if (w.meta && Array.isArray(data.pendingReview)) {
+          pendingReviewSet = new Set(data.pendingReview.map(String));
+          localStorage.setItem(LS_PENDING_REVIEW, JSON.stringify(Array.from(pendingReviewSet)));
+        }
+
+        if (w.studyLog && data.studyLog && typeof data.studyLog === "object") {
+          localStorage.setItem(LS_STUDY_LOG, JSON.stringify(data.studyLog));
+        }
+
+        if (w.meta && data.dailyPlanState && typeof data.dailyPlanState === "object") {
+          localStorage.setItem(LS_DAILY_STATE, JSON.stringify(normalizeDailyState(data.dailyPlanState)));
+        }
+
+        if (w.meta && data.studySession != null && typeof data.studySession === "object") {
+          try {
+            localStorage.setItem(LS_STUDY_SESSION, JSON.stringify(data.studySession));
+          } catch (_) {}
+        }
+      } finally {
+        suppressCloudSchedule--;
+      }
+    }
+
+    async function pullCloudOverwriteLocal(uid) {
+      const rtdb = getFirebaseRtdb();
+      if (!rtdb) return;
+      const snap = await rtdb.ref("users/" + uid).once("value");
+      const v = snap.val();
+      if (!v || typeof v !== "object") {
+        await writeUserRealtimeDb(uid);
+        return;
+      }
+      const assembled = {};
+      const which = { progress: false, favorites: false, studyLog: false, meta: false };
+      if (v.progress && typeof v.progress === "object" && Object.keys(v.progress).length > 0) {
+        assembled.progress = v.progress;
+        which.progress = true;
+      }
+      if (Array.isArray(v.favorites)) {
+        assembled.favorites = v.favorites;
+        which.favorites = true;
+      }
+      if (v.studyLog && typeof v.studyLog === "object") {
+        assembled.studyLog = v.studyLog;
+        which.studyLog = true;
+      }
+      if (v.meta && typeof v.meta === "object") {
+        const m = v.meta;
+        if (Array.isArray(m.pendingReview)) assembled.pendingReview = m.pendingReview;
+        if (m.dailyPlanState && typeof m.dailyPlanState === "object") assembled.dailyPlanState = m.dailyPlanState;
+        if (m.studySession != null && typeof m.studySession === "object") assembled.studySession = m.studySession;
+        which.meta =
+          Array.isArray(assembled.pendingReview) ||
+          (assembled.dailyPlanState && typeof assembled.dailyPlanState === "object") ||
+          (assembled.studySession != null && typeof assembled.studySession === "object");
+      }
+      applyRtdbUserSnapshot(assembled, which);
+    }
+
+    function tryRestoreSessionFromStorage() {
+      const s = loadSession();
+      const okMode =
+        s &&
+        (s.learnMode === "new" ||
+          s.learnMode === "due" ||
+          s.learnMode === "level" ||
+          s.learnMode === "favorites" ||
+          s.learnMode === "pending");
+      if (!okMode || !Array.isArray(s.queue) || s.queue.length === 0) return false;
+      learnMode = s.learnMode;
+      levelMode = VALID_LEVEL_SELECT.has(s.levelMode) ? s.levelMode : "n1";
+      activeFilter =
+        s.activeFilter === CAT.all || s.activeFilter === CAT.hikou || s.activeFilter === CAT.jotai
+          ? s.activeFilter
+          : CAT.all;
+      sessionBucket = {
+        queue: s.queue.map(String),
+        known: Number(s.known) || 0,
+        unknown: Number(s.unknown) || 0
+      };
+      setFilterUI();
+      setLevelUI();
+      updateStudyChrome();
+      showStudyView();
+      render();
+      return true;
+    }
+
+    function updateAuthBarUI(user, opts) {
+      const out = document.getElementById("authLoggedOut");
+      const inn = document.getElementById("authLoggedIn");
+      const avatar = document.getElementById("authAvatar");
+      const nameEl = document.getElementById("authName");
+      const btnIn = document.getElementById("btnGoogleSignIn");
+      if (!out || !inn) return;
+      if (opts && opts.disabled) {
+        inn.classList.add("is-hidden");
+        out.classList.remove("is-hidden");
+        if (btnIn) {
+          btnIn.disabled = true;
+          btnIn.title = "请先在脚本中填写 firebaseConfig";
+        }
+        return;
+      }
+      if (btnIn) {
+        btnIn.disabled = false;
+        btnIn.removeAttribute("title");
+      }
+      if (user) {
+        out.classList.add("is-hidden");
+        inn.classList.remove("is-hidden");
+        if (avatar) {
+          avatar.src = user.photoURL || "";
+          avatar.alt = user.displayName || user.email || "";
+        }
+        if (nameEl) nameEl.textContent = user.displayName || user.email || "已登录";
+      } else {
+        inn.classList.add("is-hidden");
+        out.classList.remove("is-hidden");
+      }
+    }
+
+    let firebaseListenersBound = false;
+
+    function initFirebaseAfterBoot() {
+      if (typeof firebase === "undefined") {
+        updateAuthBarUI(null, { disabled: true });
+        return;
+      }
+      if (!isFirebaseConfigured()) {
+        updateAuthBarUI(null, { disabled: true });
+        return;
+      }
+      try {
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      } catch (e) {
+        if (e.code !== "app/duplicate-app") {
+          console.error(e);
+          updateAuthBarUI(null, { disabled: true });
+          return;
+        }
+      }
+      if (!getFirebaseRtdb()) {
+        console.error("firebase-database-compat 未加载或初始化失败");
+        updateAuthBarUI(null, { disabled: true });
+        return;
+      }
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        firebaseUser = user;
+        if (!user) {
+          updateAuthBarUI(null);
+          return;
+        }
+        try {
+          await pullCloudOverwriteLocal(user.uid);
+          loadAllProgressKeysFromLS();
+          syncGoalControls(loadDailyState().goal);
+          updateDailyPlanUI();
+          updateSquirrelCompanion();
+          refreshHomeStats();
+          setFilterUI();
+          setLevelUI();
+          const restored = tryRestoreSessionFromStorage();
+          if (!restored) {
+            if (studyView && !studyView.classList.contains("view-hidden")) {
+              render();
+              updateProgressUI();
+              updateRelearnButton();
+              updateFavButton();
+            } else {
+              refreshHomeStats();
+            }
+          }
+        } catch (err) {
+          console.error("加载云端数据失败", err);
+          alert("同步云端数据失败，请检查网络与 Realtime Database 规则。\n" + (err.message || err.code || err));
+        }
+        updateAuthBarUI(user);
+      });
+
+      if (!firebaseListenersBound) {
+        firebaseListenersBound = true;
+        const btnIn = document.getElementById("btnGoogleSignIn");
+        const btnOut = document.getElementById("btnSignOut");
+        if (btnIn) {
+          btnIn.addEventListener("click", async () => {
+            try {
+              const provider = new firebase.auth.GoogleAuthProvider();
+              provider.addScope("profile");
+              provider.addScope("email");
+              provider.setCustomParameters({ prompt: "select_account" });
+              await firebase.auth().signInWithPopup(provider);
+            } catch (e) {
+              console.error(e);
+              alert("登录失败：" + (e.message || e.code || "未知错误"));
+            }
+          });
+        }
+        if (btnOut) {
+          btnOut.addEventListener("click", async () => {
+            try {
+              await flushCloudSaveNow();
+              await firebase.auth().signOut();
+            } catch (e) {
+              console.error(e);
+            }
+          });
+        }
+        window.addEventListener("pagehide", () => {
+          void flushCloudSaveNow();
+        });
+      }
+    }
+
+    function setHomeLevelUI() {
+      homeLevelRow.querySelectorAll("[data-home-level]").forEach((btn) => {
+        const lv = btn.getAttribute("data-home-level");
+        const on = lv === homeLevel;
+        btn.classList.toggle("is-active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    }
+
+    function setFilterUI() {
+      filterRow.querySelectorAll(".filter-btn").forEach((btn) => {
+        const f = btn.getAttribute("data-filter");
+        const on = f === activeFilter;
+        btn.classList.toggle("is-active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    }
+
+    function setLevelUI() {
+      levelRow.querySelectorAll("[data-level]").forEach((btn) => {
+        const lv = btn.getAttribute("data-level");
+        const on = lv === levelMode;
+        btn.classList.toggle("is-active", on);
+        btn.setAttribute("aria-selected", on ? "true" : "false");
+      });
+    }
+
+    function updateStudyChrome() {
+      const tags = {
+        new: "学新词",
+        due: "今日复习",
+        level: "按级别",
+        favorites: "收藏夹",
+        pending: "待复习"
+      };
+      studyModeTag.textContent = tags[learnMode] || "学习";
+      const showLevel = learnMode === "new" || learnMode === "level";
+      levelRow.classList.toggle("view-hidden", !showLevel);
+      const showFav = learnMode === "favorites";
+      favRestartRow.classList.toggle("view-hidden", !showFav);
+    }
+
+    function applyEbbinghausKnown(w) {
+      const wk = wordKey(w);
+      let p = getWordProgress(wk);
+      const t = todayStr();
+      if (p.mastered) return;
+      if (p.step === 6 && p.nextReview && p.nextReview <= t) {
+        p.mastered = true;
+        p.nextReview = null;
+        setWordProgress(wk, p);
+        bumpReviewToday();
+        return;
+      }
+      if (p.step === 6 && p.nextReview && p.nextReview > t) {
+        return;
+      }
+      if (p.step === 0) {
+        p.step = 1;
+        p.nextReview = addDays(t, INTERVALS[0]);
+        setWordProgress(wk, p);
+        bumpNewLearnToday();
+        return;
+      }
+      if (p.step < 6) {
+        p.step++;
+        p.nextReview = addDays(t, INTERVALS[p.step - 1]);
+        setWordProgress(wk, p);
+        bumpReviewToday();
+      }
+    }
+
+    function applyEbbinghausUnknown(w) {
+      const wk = wordKey(w);
+      setWordProgress(wk, defaultProgress());
+    }
+
+    function answeredTotal() {
+      return sessionBucket.known + sessionBucket.unknown;
+    }
+
+    function burstStars() {
+      if (sessionBucket.queue.length === 0) return;
+      const symbols = ["✨", "⭐", "💫", "✦", "🌟"];
+      for (let i = 0; i < 16; i++) {
+        const el = document.createElement("span");
+        el.className = "star-particle";
+        el.textContent = symbols[i % symbols.length];
+        const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.4;
+        const dist = 48 + Math.random() * 72;
+        el.style.setProperty("--dx", Math.cos(angle) * dist + "px");
+        el.style.setProperty("--dy", Math.sin(angle) * dist + "px");
+        el.style.setProperty("--rot", (Math.random() * 80 - 40).toFixed(1) + "deg");
+        starBurst.appendChild(el);
+        setTimeout(() => el.remove(), 900);
+      }
+    }
+
+    function celebrateConfetti() {
+      playVictory();
+      confettiLayer.innerHTML = "";
+      const colors = ["#8fbc8f", "#c8e6c9", "#fff9c4", "#a5d6a7", "#81c784", "#dce775", "#aed581", "#fff59d"];
+      for (let i = 0; i < 110; i++) {
+        const p = document.createElement("div");
+        p.className = "confetti-piece";
+        p.style.left = Math.random() * 100 + "vw";
+        p.style.background = colors[i % colors.length];
+        p.style.setProperty("--tx", (Math.random() * 120 - 60).toFixed(1) + "px");
+        p.style.setProperty("--rot", (360 + Math.random() * 720).toFixed(0) + "deg");
+        p.style.setProperty("--dur", (2.2 + Math.random() * 2).toFixed(2) + "s");
+        p.style.setProperty("--delay", (Math.random() * 0.35).toFixed(2) + "s");
+        if (Math.random() > 0.5) {
+          p.style.borderRadius = "50%";
+          p.style.width = "8px";
+          p.style.height = "8px";
+        }
+        confettiLayer.appendChild(p);
+      }
+      setTimeout(() => {
+        confettiLayer.innerHTML = "";
+      }, 5200);
+    }
+
+    function mascotReact(type) {
+      if (mascotTimer) clearTimeout(mascotTimer);
+      mascotBubble.classList.remove("show");
+      mascotBubble.textContent = "";
+      requestAnimationFrame(() => {
+        mascotBubble.textContent = type === "known" ? "よかった！🌿" : "大丈夫！慢慢来🌱";
+        mascotBubble.classList.add("show");
+        mascotTimer = setTimeout(() => {
+          mascotBubble.classList.remove("show");
+          mascotTimer = setTimeout(() => {
+            mascotBubble.textContent = "";
+          }, 280);
+        }, 2000);
+      });
+    }
+
+    function setExampleBlock(block, jpEl, furiEl, zhEl, ex, exF, exZh) {
+      const has =
+        (ex && String(ex).trim()) ||
+        (exF && String(exF).trim()) ||
+        (exZh && String(exZh).trim());
+      if (!has) {
+        block.classList.add("is-hidden");
+        return;
+      }
+      block.classList.remove("is-hidden");
+      jpEl.textContent = (ex && String(ex).trim()) || "—";
+      furiEl.textContent = (exF && String(exF).trim()) || "";
+      zhEl.textContent = (exZh && String(exZh).trim()) || "";
+      furiEl.style.display = furiEl.textContent ? "block" : "none";
+    }
+
+    function getCurrentWord() {
+      const k = sessionBucket.queue[0];
+      return k ? idMap.get(String(k)) : null;
+    }
+
+    function updateFavButton() {
+      const w = getCurrentWord();
+      favBtn.style.display = w ? "flex" : "none";
+      if (!w) return;
+      const on = favoriteSet.has(wordKey(w));
+      favBtn.classList.toggle("is-on", on);
+      favBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      favIcon.textContent = on ? "★" : "⭐";
+    }
+
+    function toggleFavorite() {
+      const w = getCurrentWord();
+      if (!w) return;
+      const k = wordKey(w);
+      const wasOn = favoriteSet.has(k);
+      if (wasOn) favoriteSet.delete(k);
+      else favoriteSet.add(k);
+      playMagic();
+      favBtn.classList.remove("spin-once");
+      void favBtn.offsetWidth;
+      favBtn.classList.add("spin-once");
+      setTimeout(() => favBtn.classList.remove("spin-once"), 580);
+      if (learnMode === "favorites" && wasOn) {
+        sessionBucket.queue = sessionBucket.queue.filter((x) => String(x) !== k);
+      }
+      saveFavoritesToLS();
+      saveSession();
+      render();
+    }
+
+    function updateProgressUI() {
+      const q = sessionBucket.queue.length;
+      const ans = answeredTotal();
+      queueNum.textContent = q;
+      answeredNum.textContent = ans;
+      const denom = ans + q;
+      const pct = denom === 0 ? 0 : Math.min(100, (100 * ans) / denom);
+      barFill.style.width = pct + "%";
+      if (progressBarWrap) progressBarWrap.classList.toggle("is-blooming", pct >= 99.5);
+      knownCountEl.textContent = sessionBucket.known;
+      unknownCountEl.textContent = sessionBucket.unknown;
+    }
+
+    function wordEligibleForRelearn(w) {
+      if (!w) return false;
+      const p = getWordProgress(wordKey(w));
+      return !!(p.mastered || p.step > 0);
+    }
+
+    function updateRelearnButton() {
+      if (!btnRelearn) return;
+      const w = getCurrentWord();
+      btnRelearn.classList.toggle("is-visible", !!w && wordEligibleForRelearn(w));
+    }
+
+    function cancelPendingCardPaint() {
+      if (renderCardDelayTimer) {
+        clearTimeout(renderCardDelayTimer);
+        renderCardDelayTimer = null;
+      }
+      scene.classList.remove("scene-no-flip-trans");
+    }
+
+    function paintStudyCardFromWord(w) {
+      const zh = w.chinese || "";
+      chineseText.textContent = zh;
+      if (chineseTextBack) chineseTextBack.textContent = zh;
+      kanjiText.textContent = w.kanji || "";
+      furiganaText.textContent = w.furigana || "";
+      accentText.textContent = w.accent != null && String(w.accent).trim() ? String(w.accent) : "—";
+      vocabTypeText.textContent = w.vocab_type != null && String(w.vocab_type).trim() ? String(w.vocab_type) : "—";
+      setPosBadges(posIconFromVocabType(w.vocab_type));
+
+      const ho = w.hosoku != null ? String(w.hosoku).trim() : "";
+      if (ho) {
+        hosokuBlock.textContent = ho;
+        hosokuBlock.classList.remove("is-hidden");
+      } else {
+        hosokuBlock.textContent = "";
+        hosokuBlock.classList.add("is-hidden");
+      }
+
+      setExampleBlock(ex1Block, ex1Jp, ex1Furi, ex1Zh, w.example1, w.example1_furigana, w.example1_chinese);
+      setExampleBlock(ex2Block, ex2Jp, ex2Furi, ex2Zh, w.example2, w.example2_furigana, w.example2_chinese);
+    }
+
+    function render(opts) {
+      const o = opts || {};
+      mainArea.querySelector(".complete")?.remove();
+      cancelPendingCardPaint();
+
+      if (learnMode === "favorites" && favoriteSet.size === 0) {
+        showFavoritesEmpty();
+        return;
+      }
+      if (
+        learnMode === "pending" &&
+        pendingReviewSet.size === 0 &&
+        sessionBucket.queue.length === 0 &&
+        answeredTotal() === 0
+      ) {
+        showPendingEmpty();
+        return;
+      }
+      if (learnMode === "pending" && sessionBucket.queue.length === 0 && answeredTotal() === 0) {
+        showPendingFilterEmpty();
+        return;
+      }
+      if (sessionBucket.queue.length === 0) {
+        showComplete(false);
+        return;
+      }
+      const w = getCurrentWord();
+      if (!w) {
+        sessionBucket.queue = sessionBucket.queue.filter(Boolean);
+        saveSession();
+        return render();
+      }
+
+      function finishPaintStudyCard() {
+        paintStudyCardFromWord(w);
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        updateProgressUI();
+        updateFavButton();
+        updateRelearnButton();
+        scene.style.display = "";
+        if (actionStrip) actionStrip.style.display = "";
+        actionRow.style.display = "";
+        btnReset.style.display = "";
+      }
+
+      if (o.deferWordPaint) {
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        scene.classList.add("scene-no-flip-trans");
+        void scene.offsetWidth;
+        renderCardDelayTimer = setTimeout(() => {
+          renderCardDelayTimer = null;
+          scene.classList.remove("scene-no-flip-trans");
+          finishPaintStudyCard();
+        }, 50);
+        return;
+      }
+
+      finishPaintStudyCard();
+    }
+
+    function showFavoritesEmpty() {
+      scene.style.display = "none";
+      if (actionStrip) actionStrip.style.display = "";
+      actionRow.style.display = "none";
+      if (btnRelearn) btnRelearn.classList.remove("is-visible");
+      btnReset.style.display = "";
+      barFill.style.width = "0%";
+      if (progressBarWrap) progressBarWrap.classList.remove("is-blooming");
+      queueNum.textContent = "0";
+      answeredNum.textContent = "0";
+      knownCountEl.textContent = "0";
+      unknownCountEl.textContent = "0";
+      favBtn.style.display = "none";
+      setPosBadges("🐱");
+      const el = document.createElement("div");
+      el.className = "complete";
+      el.innerHTML =
+        COMPLETE_MASCOT_IMG +
+        "<h2>⭐ 收藏夹还是空的</h2>" +
+        "<p>在学习时点星星即可收藏～</p>" +
+        "<p>点「返回首页」继续。</p>";
+      mainArea.querySelector(".complete")?.remove();
+      mainArea.insertBefore(el, mainArea.firstChild);
+    }
+
+    function showPendingEmpty() {
+      scene.style.display = "none";
+      if (actionStrip) actionStrip.style.display = "";
+      actionRow.style.display = "none";
+      if (btnRelearn) btnRelearn.classList.remove("is-visible");
+      btnReset.style.display = "";
+      barFill.style.width = "0%";
+      if (progressBarWrap) progressBarWrap.classList.remove("is-blooming");
+      queueNum.textContent = "0";
+      answeredNum.textContent = "0";
+      knownCountEl.textContent = "0";
+      unknownCountEl.textContent = "0";
+      favBtn.style.display = "none";
+      setPosBadges("🐱");
+      const el = document.createElement("div");
+      el.className = "complete";
+      el.innerHTML =
+        COMPLETE_MASCOT_IMG +
+        "<h2>🌿 还没有待复习的词</h2>" +
+        "<p>在学习时点击「不认识」，单词会进入这里哦～</p>" +
+        "<p>点「返回首页」继续。</p>";
+      mainArea.querySelector(".complete")?.remove();
+      mainArea.insertBefore(el, mainArea.firstChild);
+    }
+
+    function showPendingFilterEmpty() {
+      scene.style.display = "none";
+      if (actionStrip) actionStrip.style.display = "";
+      actionRow.style.display = "none";
+      if (btnRelearn) btnRelearn.classList.remove("is-visible");
+      btnReset.style.display = "";
+      barFill.style.width = "0%";
+      if (progressBarWrap) progressBarWrap.classList.remove("is-blooming");
+      queueNum.textContent = "0";
+      answeredNum.textContent = "0";
+      knownCountEl.textContent = "0";
+      unknownCountEl.textContent = "0";
+      favBtn.style.display = "none";
+      setPosBadges("🐱");
+      const el = document.createElement("div");
+      el.className = "complete";
+      el.innerHTML =
+        "<h2>🌿 没有符合条件的待复习词</h2>" +
+        "<p>当前筛选下没有待复习单词，试试切到「全部」，或返回首页。</p>";
+      mainArea.querySelector(".complete")?.remove();
+      mainArea.insertBefore(el, mainArea.firstChild);
+    }
+
+    function toggleFlip() {
+      if (sessionBucket.queue.length === 0) return;
+      scene.classList.remove("scene-no-flip-trans");
+      playSwoosh();
+      flipped = !flipped;
+      scene.classList.toggle("is-flipped", flipped);
+      burstStars();
+    }
+
+    function dequeueKnown() {
+      if (sessionBucket.queue.length === 0) return;
+      const w = getCurrentWord();
+      sessionBucket.queue.shift();
+      sessionBucket.known++;
+      if (w) {
+        applyEbbinghausKnown(w);
+        removePendingReview(wordKey(w));
+      }
+      saveSession();
+      bumpDailyMastered();
+      afterAnswer();
+    }
+
+    function dequeueUnknown() {
+      if (sessionBucket.queue.length === 0) return;
+      const w = getCurrentWord();
+      const id = sessionBucket.queue.shift();
+      const pos = Math.min(REVIEW_GAP, sessionBucket.queue.length);
+      sessionBucket.queue.splice(pos, 0, id);
+      sessionBucket.unknown++;
+      if (w) {
+        applyEbbinghausUnknown(w);
+        addPendingReview(wordKey(w));
+      }
+      saveSession();
+      bumpDailyStudied();
+      afterAnswer();
+    }
+
+    function afterAnswer() {
+      refreshHomeStats();
+      if (learnMode === "favorites" && favoriteSet.size === 0) {
+        cancelPendingCardPaint();
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        showFavoritesEmpty();
+        return;
+      }
+      if (sessionBucket.queue.length === 0) {
+        cancelPendingCardPaint();
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        showComplete(true);
+      } else {
+        render({ deferWordPaint: true });
+      }
+    }
+
+    function showComplete(withCelebrate) {
+      scene.style.display = "none";
+      if (actionStrip) actionStrip.style.display = "";
+      actionRow.style.display = "none";
+      if (btnRelearn) btnRelearn.classList.remove("is-visible");
+      btnReset.style.display = "";
+      barFill.style.width = "100%";
+      if (progressBarWrap) {
+        const bloom = withCelebrate || answeredTotal() > 0;
+        progressBarWrap.classList.toggle("is-blooming", bloom);
+      }
+      queueNum.textContent = "0";
+      answeredNum.textContent = answeredTotal();
+      knownCountEl.textContent = sessionBucket.known;
+      unknownCountEl.textContent = sessionBucket.unknown;
+      favBtn.style.display = "none";
+      if (withCelebrate) celebrateConfetti();
+      const celebrateSvg = withCelebrate ? COMPLETE_MASCOT_IMG : "";
+      const el = document.createElement("div");
+      el.className = "complete";
+      el.innerHTML =
+        celebrateSvg +
+        "<h2>🎉 本轮完成 🎉</h2>" +
+        "<p>队列已清空。艾宾浩斯复习计划已更新～</p>" +
+        '<div class="big-num">' +
+        sessionBucket.known +
+        " 认识 · " +
+        sessionBucket.unknown +
+        " 不认识" +
+        "</div>" +
+        "<p>返回首页或点「重新本轮」再练一轮。</p>";
+      mainArea.querySelector(".complete")?.remove();
+      mainArea.insertBefore(el, mainArea.firstChild);
+    }
+
+    function applyCategoryFilter(newFilter, forceNewQueue) {
+      if (newFilter === activeFilter && !forceNewQueue) return;
+      activeFilter = newFilter;
+      setFilterUI();
+      sessionBucket.queue = buildQueueKeys();
+      sessionBucket.known = 0;
+      sessionBucket.unknown = 0;
+      saveSession();
+      mainArea.querySelector(".complete")?.remove();
+      confettiLayer.innerHTML = "";
+      render();
+    }
+
+    function switchLevelInStudy(lv) {
+      if (learnMode !== "new" && learnMode !== "level") return;
+      if (lv === levelMode) return;
+      levelMode = lv;
+      setLevelUI();
+      sessionBucket.queue = buildQueueKeys();
+      sessionBucket.known = 0;
+      sessionBucket.unknown = 0;
+      saveSession();
+      mainArea.querySelector(".complete")?.remove();
+      confettiLayer.innerHTML = "";
+      render();
+    }
+
+    scene.addEventListener("click", () => {
+      if (sessionBucket.queue.length === 0) return;
+      toggleFlip();
+    });
+
+    scene.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        if (sessionBucket.queue.length > 0) toggleFlip();
+      }
+    });
+
+    if (squirrelHit) {
+      squirrelHit.addEventListener("click", (e) => {
+        e.stopPropagation();
+        showEncourageTip();
+      });
+    }
+
+    favBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleFavorite();
+    });
+
+    if (btnRelearn) {
+      btnRelearn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const w = getCurrentWord();
+        if (!w || !wordEligibleForRelearn(w)) return;
+        if (
+          !confirm(
+            "确定要重置该单词的学习状态吗？重置后需重新学习哦～"
+          )
+        ) {
+          return;
+        }
+        const wk = wordKey(w);
+        setWordProgress(wk, defaultProgress());
+        removePendingReview(wk);
+        saveSession();
+        playSwoosh();
+        updateRelearnButton();
+        render();
+      });
+    }
+
+    btnKnown.addEventListener("click", () => {
+      if (sessionBucket.queue.length === 0) return;
+      playDing();
+      mascotReact("known");
+      dequeueKnown();
+    });
+
+    btnUnknown.addEventListener("click", () => {
+      if (sessionBucket.queue.length === 0) return;
+      playThud();
+      mascotReact("unknown");
+      dequeueUnknown();
+    });
+
+    btnReset.addEventListener("click", () => {
+      if (!confirm("确定要清空本轮学习队列并重新开始吗？")) return;
+      sessionBucket.queue = buildQueueKeys();
+      sessionBucket.known = 0;
+      sessionBucket.unknown = 0;
+      saveSession();
+      mainArea.querySelector(".complete")?.remove();
+      confettiLayer.innerHTML = "";
+      render();
+    });
+
+    filterRow.addEventListener("click", (e) => {
+      const btn = e.target.closest(".filter-btn");
+      if (!btn) return;
+      const f = btn.getAttribute("data-filter");
+      if (!f) return;
+      applyCategoryFilter(f, false);
+    });
+
+    levelRow.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-level]");
+      if (!btn) return;
+      const lv = btn.getAttribute("data-level");
+      if (VALID_LEVEL_SELECT.has(lv)) switchLevelInStudy(lv);
+    });
+
+    btnBackHome.addEventListener("click", () => {
+      showHomeView();
+    });
+
+    btnStartDueToday.addEventListener("click", () => {
+      startSessionFromMode("due", false);
+    });
+
+    homeView.querySelectorAll("[data-enter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const m = btn.getAttribute("data-enter");
+        if (m === "new" || m === "due" || m === "level" || m === "favorites" || m === "pending") {
+          if (m === "due") startSessionFromMode("due", false);
+          else if (m === "favorites") startSessionFromMode("favorites", false);
+          else if (m === "pending") startSessionFromMode("pending", false);
+          else startSessionFromMode(m, true);
+        }
+      });
+    });
+
+    homeLevelRow.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-home-level]");
+      if (!btn) return;
+      const lv = btn.getAttribute("data-home-level");
+      if (VALID_LEVEL_SELECT.has(lv)) {
+        homeLevel = lv;
+        setHomeLevelUI();
+      }
+    });
+
+    btnFavRestart.addEventListener("click", () => {
+      if (
+        !confirm(
+          "确定要重新开始吗？学习记录将被清除"
+        )
+      ) {
+        return;
+      }
+      for (const wk of favoriteSet) {
+        localStorage.removeItem(progressStorageKey(wk));
+        progressMem.delete(wk);
+      }
+      sessionBucket.queue = buildQueueKeys();
+      sessionBucket.known = 0;
+      sessionBucket.unknown = 0;
+      saveSession();
+      refreshHomeStats();
+      mainArea.querySelector(".complete")?.remove();
+      confettiLayer.innerHTML = "";
+      render();
+    });
+
+    function initDailyPlanUI() {
+      rolloverDailyStateIfNeeded();
+      const st = loadDailyState();
+      syncGoalControls(st.goal);
+      updateDailyPlanUI();
+      updateSquirrelCompanion();
+      if (goalChipRow && !goalChipRow.dataset.bound) {
+        goalChipRow.dataset.bound = "1";
+        goalChipRow.addEventListener("click", (e) => {
+          const btn = e.target.closest(".goal-chip");
+          if (!btn) return;
+          const g = btn.getAttribute("data-goal");
+          if (g != null) setDailyGoal(Number(g));
+        });
+      }
+      if (dailyGoalInput && !dailyGoalInput.dataset.bound) {
+        dailyGoalInput.dataset.bound = "1";
+        dailyGoalInput.addEventListener("change", () => setDailyGoal(Number(dailyGoalInput.value)));
+      }
+      if (!document.documentElement.dataset.dailyVisBound) {
+        document.documentElement.dataset.dailyVisBound = "1";
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "hidden") void flushCloudSaveNow();
+          if (document.visibilityState !== "visible") return;
+          rolloverDailyStateIfNeeded();
+          syncGoalControls(loadDailyState().goal);
+          updateDailyPlanUI();
+          updateSquirrelCompanion();
+        });
+      }
+    }
+
+    async function tryFetchCorpusJson(url) {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return { ok: false, data: [], status: r.status };
+        const j = await r.json();
+        return { ok: true, data: Array.isArray(j) ? j : [], status: r.status };
+      } catch {
+        return { ok: false, data: [], status: 0 };
+      }
+    }
+
+    async function boot() {
+      try {
+        const [r1, r2, r3, r4, r5] = await Promise.all([
+          tryFetchCorpusJson(URL_N1),
+          tryFetchCorpusJson(URL_N2),
+          tryFetchCorpusJson(URL_N3),
+          tryFetchCorpusJson(URL_N4),
+          tryFetchCorpusJson(URL_N5)
+        ]);
+        if (!r1.ok) throw new Error("N1 词库无法加载（HTTP " + (r1.status || "?") + "）");
+        if (!r2.ok) throw new Error("N2 词库无法加载（HTTP " + (r2.status || "?") + "）");
+        corpus.n1 = r1.data;
+        corpus.n2 = r2.data;
+        corpus.n3 = r3.ok ? r3.data : [];
+        corpus.n4 = r4.ok ? r4.data : [];
+        corpus.n5 = r5.ok ? r5.data : [];
+        const total =
+          corpus.n1.length + corpus.n2.length + corpus.n3.length + corpus.n4.length + corpus.n5.length;
+        if (total === 0) throw new Error("词库为空");
+
+        idMap = new Map();
+        for (const w of corpus.n1) {
+          w._lv = "n1";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n2) {
+          w._lv = "n2";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n3) {
+          w._lv = "n3";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n4) {
+          w._lv = "n4";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n5) {
+          w._lv = "n5";
+          idMap.set(wordKey(w), w);
+        }
+        corpusSig = {
+          n1: corpus.n1.length,
+          n2: corpus.n2.length,
+          n3: corpus.n3.length,
+          n4: corpus.n4.length,
+          n5: corpus.n5.length
+        };
+
+        const failed = [];
+        if (!r3.ok) failed.push("N3");
+        if (!r4.ok) failed.push("N4");
+        if (!r5.ok) failed.push("N5");
+        if (corpusHintBar) {
+          if (failed.length) {
+            corpusHintBar.classList.remove("view-hidden");
+            corpusHintBar.textContent =
+              "词库加载中：" +
+              failed.join("、") +
+              " 暂不可用（请检查 words_n*.json 或稍后刷新）；其余级别已就绪。";
+          } else {
+            corpusHintBar.classList.add("view-hidden");
+            corpusHintBar.textContent = "";
+          }
+        }
+
+        migrateLegacyFavorites();
+        favoriteSet = loadFavoritesFromLS();
+        pendingReviewSet = loadPendingReviewFromLS();
+        loadAllProgressKeysFromLS();
+
+        setHomeLevelUI();
+        setFilterUI();
+        setLevelUI();
+
+        bootScreen.classList.add("is-hidden");
+        document.body.classList.remove("is-loading");
+        if (siteHeader) siteHeader.classList.remove("view-hidden");
+        if (appLayout) appLayout.classList.remove("view-hidden");
+        homeView.classList.remove("view-hidden");
+        studyView.classList.add("view-hidden");
+        initDailyPlanUI();
+        refreshHomeStats();
+
+        tryRestoreSessionFromStorage();
+        initFirebaseAfterBoot();
+        startEncourageLoop();
+      } catch (err) {
+        bootError.classList.remove("is-hidden");
+        bootError.innerHTML =
+          "无法加载词库（至少需要可用的 <code>words_n1.json</code> 与 <code>words_n2.json</code>）。若直接双击打开 HTML，浏览器会拦截本地文件请求。<br /><br />请在本目录运行本地服务器，例如：<br /><code>npx serve .</code> 或 <code>python3 -m http.server</code><br /><br />然后再用浏览器访问页面。";
+        document.body.classList.remove("is-loading");
+        console.error(err);
+      }
+    }
+
+    boot();
+
+  </script>
+</body>
+</html>

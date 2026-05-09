@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>森林里的日语小屋 · N1 / N2</title>
+  <title>森林里的日语小屋 · JLPT 词库</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -875,7 +875,7 @@
 
     .level-row .filter-btn {
       flex: 1;
-      min-width: calc(25% - 6px);
+      min-width: calc(20% - 6px);
     }
 
     .filter-row {
@@ -1229,6 +1229,10 @@
 
     .scene.is-flipped .card {
       transform: rotateY(180deg);
+    }
+
+    .scene.scene-no-flip-trans .card {
+      transition: none !important;
     }
 
     .face {
@@ -2344,7 +2348,23 @@
 
     .home-level-row .filter-btn {
       flex: 1;
-      min-width: calc(33.33% - 8px);
+      min-width: calc(20% - 8px);
+    }
+
+    .corpus-hint-bar {
+      margin: 10px auto 0;
+      max-width: 520px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      font-family: var(--font-ui);
+      color: #4a6048;
+      text-align: center;
+      line-height: 1.45;
+      background: rgba(255, 252, 246, 0.72);
+      border: 1px solid rgba(120, 160, 120, 0.35);
+      box-shadow: 0 2px 10px rgba(60, 90, 70, 0.08);
     }
 
     .study-top {
@@ -2503,6 +2523,7 @@
         <div class="daily-plan-fill" id="dailyPlanFillHeader"></div>
       </div>
     </div>
+    <p class="corpus-hint-bar view-hidden" id="corpusHintBar" role="status"></p>
   </header>
 
   <div class="app-layout view-hidden" id="appLayout">
@@ -2540,7 +2561,7 @@
           </button>
           <button type="button" class="mode-card" data-enter="level">
             <span class="mode-ico" aria-hidden="true">🎯</span>
-            <span class="mode-text"><strong>按级别</strong><span class="sub">在 N1 / N2 范围里混合练</span></span>
+            <span class="mode-text"><strong>按级别</strong><span class="sub">在选定 JLPT 级别范围内混合练</span></span>
           </button>
           <button type="button" class="mode-card" data-enter="favorites">
             <span class="mode-ico" aria-hidden="true">⭐</span>
@@ -2551,11 +2572,13 @@
             <span class="mode-text"><strong>待复习</strong><span class="sub">点过「不认识」的词</span></span>
           </button>
         </div>
-        <p style="margin:0;font-size:0.72rem;font-weight:600;font-family:var(--font-ui);color:#5a6b5e;text-align:center">学新词 / 按级别 使用的范围</p>
+        <p style="margin:0;font-size:0.72rem;font-weight:600;font-family:var(--font-ui);color:#5a6b5e;text-align:center">学新词 / 按级别 使用的 JLPT 范围</p>
         <div class="home-level-row" id="homeLevelRow" role="tablist" aria-label="首页级别">
           <button type="button" class="filter-btn is-active" data-home-level="n1" role="tab" aria-selected="true">N1</button>
           <button type="button" class="filter-btn" data-home-level="n2" role="tab" aria-selected="false">N2</button>
-          <button type="button" class="filter-btn" data-home-level="all" role="tab" aria-selected="false">N1+N2</button>
+          <button type="button" class="filter-btn" data-home-level="n3" role="tab" aria-selected="false">N3</button>
+          <button type="button" class="filter-btn" data-home-level="n4n5" role="tab" aria-selected="false">N4+N5</button>
+          <button type="button" class="filter-btn" data-home-level="all" role="tab" aria-selected="false">全部</button>
         </div>
       </div>
 
@@ -2579,7 +2602,9 @@
       <div class="level-row view-hidden" id="levelRow" role="tablist" aria-label="级别">
         <button type="button" class="filter-btn is-active" data-level="n1" role="tab" aria-selected="true">N1</button>
         <button type="button" class="filter-btn" data-level="n2" role="tab" aria-selected="false">N2</button>
-        <button type="button" class="filter-btn" data-level="all" role="tab" aria-selected="false">N1+N2全部</button>
+        <button type="button" class="filter-btn" data-level="n3" role="tab" aria-selected="false">N3</button>
+        <button type="button" class="filter-btn" data-level="n4n5" role="tab" aria-selected="false">N4+N5</button>
+        <button type="button" class="filter-btn" data-level="all" role="tab" aria-selected="false">全部</button>
       </div>
       <div class="filter-row" id="filterRow" role="tablist" aria-label="词库范围">
         <button type="button" class="filter-btn is-active" data-filter="all" role="tab" aria-selected="true">全部</button>
@@ -2738,6 +2763,9 @@
   <script>
     const URL_N1 = "words_n1.json";
     const URL_N2 = "words_n2.json";
+    const URL_N3 = "words_n3.json";
+    const URL_N4 = "words_n4.json";
+    const URL_N5 = "words_n5.json";
 
     // =============================================================================
     // Firebase：Authentication（Google）+ Realtime Database
@@ -2778,14 +2806,16 @@
     const INTERVALS = [1, 2, 4, 7, 15, 30];
 
     const CAT = { all: "all", hikou: "hikou", jotai: "jotai" };
+    const VALID_LEVEL_SELECT = new Set(["n1", "n2", "n3", "n4n5", "all"]);
 
-    const corpus = { n1: [], n2: [] };
+    const corpus = { n1: [], n2: [], n3: [], n4: [], n5: [] };
     let idMap = new Map();
-    let corpusSig = { n1: 0, n2: 0 };
+    /** @type {{ n1: number; n2: number; n3: number; n4: number; n5: number }} */
+    let corpusSig = { n1: 0, n2: 0, n3: 0, n4: 0, n5: 0 };
 
-    /** @type {'n1'|'n2'|'all'} */
+    /** @type {'n1'|'n2'|'n3'|'n4n5'|'all'} */
     let levelMode = "n1";
-    /** @type {'n1'|'n2'|'all'} */
+    /** @type {'n1'|'n2'|'n3'|'n4n5'|'all'} */
     let homeLevel = "n1";
     /** @type {'new'|'due'|'level'|'favorites'|'pending'} */
     let learnMode = "new";
@@ -2799,6 +2829,7 @@
 
     let flipped = false;
     let mascotTimer = null;
+    let renderCardDelayTimer = null;
 
     const scene = document.getElementById("scene");
     const starBurst = document.getElementById("starBurst");
@@ -2838,6 +2869,7 @@
     const sidebarGoalLine = document.getElementById("sidebarGoalLine");
     const sidebarDoneLine = document.getElementById("sidebarDoneLine");
     const siteHeader = document.getElementById("siteHeader");
+    const corpusHintBar = document.getElementById("corpusHintBar");
     const appLayout = document.getElementById("appLayout");
     const confettiLayer = document.getElementById("confettiLayer");
     const mascot = document.getElementById("mascot");
@@ -3402,7 +3434,7 @@
         const raw = localStorage.getItem(LS_STUDY_SESSION);
         if (!raw) return null;
         const o = JSON.parse(raw);
-        if (!o.corpusSig || o.corpusSig.n1 !== corpusSig.n1 || o.corpusSig.n2 !== corpusSig.n2) return null;
+        if (!corpusSigMatchesStored(o.corpusSig)) return null;
         return o;
       } catch {
         return null;
@@ -3420,7 +3452,19 @@
     function wordsForLevel(lv) {
       if (lv === "n1") return corpus.n1;
       if (lv === "n2") return corpus.n2;
-      return corpus.n1.concat(corpus.n2);
+      if (lv === "n3") return corpus.n3;
+      if (lv === "n4n5") return corpus.n4.concat(corpus.n5);
+      if (lv === "all") return corpus.n1.concat(corpus.n2, corpus.n3, corpus.n4, corpus.n5);
+      return corpus.n1;
+    }
+
+    function corpusSigMatchesStored(stored) {
+      if (!stored || typeof stored !== "object") return false;
+      const keys = ["n1", "n2", "n3", "n4", "n5"];
+      for (const k of keys) {
+        if (Number(stored[k]) !== Number(corpusSig[k])) return false;
+      }
+      return true;
     }
 
     function isDueWord(wk, today) {
@@ -3520,6 +3564,7 @@
     }
 
     function showHomeView() {
+      cancelPendingCardPaint();
       saveSession();
       if (siteHeader) siteHeader.classList.remove("view-hidden");
       if (appLayout) appLayout.classList.remove("view-hidden");
@@ -3729,8 +3774,7 @@
           s.learnMode === "pending");
       if (!okMode || !Array.isArray(s.queue) || s.queue.length === 0) return false;
       learnMode = s.learnMode;
-      levelMode =
-        s.levelMode === "n1" || s.levelMode === "n2" || s.levelMode === "all" ? s.levelMode : "n1";
+      levelMode = VALID_LEVEL_SELECT.has(s.levelMode) ? s.levelMode : "n1";
       activeFilter =
         s.activeFilter === CAT.all || s.activeFilter === CAT.hikou || s.activeFilter === CAT.jotai
           ? s.activeFilter
@@ -4090,8 +4134,42 @@
       btnRelearn.classList.toggle("is-visible", !!w && wordEligibleForRelearn(w));
     }
 
-    function render() {
+    function cancelPendingCardPaint() {
+      if (renderCardDelayTimer) {
+        clearTimeout(renderCardDelayTimer);
+        renderCardDelayTimer = null;
+      }
+      scene.classList.remove("scene-no-flip-trans");
+    }
+
+    function paintStudyCardFromWord(w) {
+      const zh = w.chinese || "";
+      chineseText.textContent = zh;
+      if (chineseTextBack) chineseTextBack.textContent = zh;
+      kanjiText.textContent = w.kanji || "";
+      furiganaText.textContent = w.furigana || "";
+      accentText.textContent = w.accent != null && String(w.accent).trim() ? String(w.accent) : "—";
+      vocabTypeText.textContent = w.vocab_type != null && String(w.vocab_type).trim() ? String(w.vocab_type) : "—";
+      setPosBadges(posIconFromVocabType(w.vocab_type));
+
+      const ho = w.hosoku != null ? String(w.hosoku).trim() : "";
+      if (ho) {
+        hosokuBlock.textContent = ho;
+        hosokuBlock.classList.remove("is-hidden");
+      } else {
+        hosokuBlock.textContent = "";
+        hosokuBlock.classList.add("is-hidden");
+      }
+
+      setExampleBlock(ex1Block, ex1Jp, ex1Furi, ex1Zh, w.example1, w.example1_furigana, w.example1_chinese);
+      setExampleBlock(ex2Block, ex2Jp, ex2Furi, ex2Zh, w.example2, w.example2_furigana, w.example2_chinese);
+    }
+
+    function render(opts) {
+      const o = opts || {};
       mainArea.querySelector(".complete")?.remove();
+      cancelPendingCardPaint();
+
       if (learnMode === "favorites" && favoriteSet.size === 0) {
         showFavoritesEmpty();
         return;
@@ -4120,36 +4198,33 @@
         return render();
       }
 
-      const zh = w.chinese || "";
-      chineseText.textContent = zh;
-      if (chineseTextBack) chineseTextBack.textContent = zh;
-      kanjiText.textContent = w.kanji || "";
-      furiganaText.textContent = w.furigana || "";
-      accentText.textContent = w.accent != null && String(w.accent).trim() ? String(w.accent) : "—";
-      vocabTypeText.textContent = w.vocab_type != null && String(w.vocab_type).trim() ? String(w.vocab_type) : "—";
-      setPosBadges(posIconFromVocabType(w.vocab_type));
-
-      const ho = w.hosoku != null ? String(w.hosoku).trim() : "";
-      if (ho) {
-        hosokuBlock.textContent = ho;
-        hosokuBlock.classList.remove("is-hidden");
-      } else {
-        hosokuBlock.textContent = "";
-        hosokuBlock.classList.add("is-hidden");
+      function finishPaintStudyCard() {
+        paintStudyCardFromWord(w);
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        updateProgressUI();
+        updateFavButton();
+        updateRelearnButton();
+        scene.style.display = "";
+        if (actionStrip) actionStrip.style.display = "";
+        actionRow.style.display = "";
+        btnReset.style.display = "";
       }
 
-      setExampleBlock(ex1Block, ex1Jp, ex1Furi, ex1Zh, w.example1, w.example1_furigana, w.example1_chinese);
-      setExampleBlock(ex2Block, ex2Jp, ex2Furi, ex2Zh, w.example2, w.example2_furigana, w.example2_chinese);
+      if (o.deferWordPaint) {
+        flipped = false;
+        scene.classList.remove("is-flipped");
+        scene.classList.add("scene-no-flip-trans");
+        void scene.offsetWidth;
+        renderCardDelayTimer = setTimeout(() => {
+          renderCardDelayTimer = null;
+          scene.classList.remove("scene-no-flip-trans");
+          finishPaintStudyCard();
+        }, 50);
+        return;
+      }
 
-      flipped = false;
-      scene.classList.remove("is-flipped");
-      updateProgressUI();
-      updateFavButton();
-      updateRelearnButton();
-      scene.style.display = "";
-      if (actionStrip) actionStrip.style.display = "";
-      actionRow.style.display = "";
-      btnReset.style.display = "";
+      finishPaintStudyCard();
     }
 
     function showFavoritesEmpty() {
@@ -4227,6 +4302,7 @@
 
     function toggleFlip() {
       if (sessionBucket.queue.length === 0) return;
+      scene.classList.remove("scene-no-flip-trans");
       playSwoosh();
       flipped = !flipped;
       scene.classList.toggle("is-flipped", flipped);
@@ -4264,17 +4340,21 @@
     }
 
     function afterAnswer() {
-      flipped = false;
-      scene.classList.remove("is-flipped");
       refreshHomeStats();
       if (learnMode === "favorites" && favoriteSet.size === 0) {
+        cancelPendingCardPaint();
+        flipped = false;
+        scene.classList.remove("is-flipped");
         showFavoritesEmpty();
         return;
       }
       if (sessionBucket.queue.length === 0) {
+        cancelPendingCardPaint();
+        flipped = false;
+        scene.classList.remove("is-flipped");
         showComplete(true);
       } else {
-        render();
+        render({ deferWordPaint: true });
       }
     }
 
@@ -4423,7 +4503,7 @@
       const btn = e.target.closest("[data-level]");
       if (!btn) return;
       const lv = btn.getAttribute("data-level");
-      if (lv === "n1" || lv === "n2" || lv === "all") switchLevelInStudy(lv);
+      if (VALID_LEVEL_SELECT.has(lv)) switchLevelInStudy(lv);
     });
 
     btnBackHome.addEventListener("click", () => {
@@ -4450,7 +4530,7 @@
       const btn = e.target.closest("[data-home-level]");
       if (!btn) return;
       const lv = btn.getAttribute("data-home-level");
-      if (lv === "n1" || lv === "n2" || lv === "all") {
+      if (VALID_LEVEL_SELECT.has(lv)) {
         homeLevel = lv;
         setHomeLevelUI();
       }
@@ -4510,15 +4590,36 @@
       }
     }
 
+    async function tryFetchCorpusJson(url) {
+      try {
+        const r = await fetch(url);
+        if (!r.ok) return { ok: false, data: [], status: r.status };
+        const j = await r.json();
+        return { ok: true, data: Array.isArray(j) ? j : [], status: r.status };
+      } catch {
+        return { ok: false, data: [], status: 0 };
+      }
+    }
+
     async function boot() {
       try {
-        const [r1, r2] = await Promise.all([fetch(URL_N1), fetch(URL_N2)]);
-        if (!r1.ok) throw new Error("N1 HTTP " + r1.status);
-        if (!r2.ok) throw new Error("N2 HTTP " + r2.status);
-        corpus.n1 = await r1.json();
-        corpus.n2 = await r2.json();
-        if (!Array.isArray(corpus.n1) || !Array.isArray(corpus.n2)) throw new Error("词库格式错误");
-        if (corpus.n1.length === 0 && corpus.n2.length === 0) throw new Error("词库为空");
+        const [r1, r2, r3, r4, r5] = await Promise.all([
+          tryFetchCorpusJson(URL_N1),
+          tryFetchCorpusJson(URL_N2),
+          tryFetchCorpusJson(URL_N3),
+          tryFetchCorpusJson(URL_N4),
+          tryFetchCorpusJson(URL_N5)
+        ]);
+        if (!r1.ok) throw new Error("N1 词库无法加载（HTTP " + (r1.status || "?") + "）");
+        if (!r2.ok) throw new Error("N2 词库无法加载（HTTP " + (r2.status || "?") + "）");
+        corpus.n1 = r1.data;
+        corpus.n2 = r2.data;
+        corpus.n3 = r3.ok ? r3.data : [];
+        corpus.n4 = r4.ok ? r4.data : [];
+        corpus.n5 = r5.ok ? r5.data : [];
+        const total =
+          corpus.n1.length + corpus.n2.length + corpus.n3.length + corpus.n4.length + corpus.n5.length;
+        if (total === 0) throw new Error("词库为空");
 
         idMap = new Map();
         for (const w of corpus.n1) {
@@ -4529,7 +4630,42 @@
           w._lv = "n2";
           idMap.set(wordKey(w), w);
         }
-        corpusSig = { n1: corpus.n1.length, n2: corpus.n2.length };
+        for (const w of corpus.n3) {
+          w._lv = "n3";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n4) {
+          w._lv = "n4";
+          idMap.set(wordKey(w), w);
+        }
+        for (const w of corpus.n5) {
+          w._lv = "n5";
+          idMap.set(wordKey(w), w);
+        }
+        corpusSig = {
+          n1: corpus.n1.length,
+          n2: corpus.n2.length,
+          n3: corpus.n3.length,
+          n4: corpus.n4.length,
+          n5: corpus.n5.length
+        };
+
+        const failed = [];
+        if (!r3.ok) failed.push("N3");
+        if (!r4.ok) failed.push("N4");
+        if (!r5.ok) failed.push("N5");
+        if (corpusHintBar) {
+          if (failed.length) {
+            corpusHintBar.classList.remove("view-hidden");
+            corpusHintBar.textContent =
+              "词库加载中：" +
+              failed.join("、") +
+              " 暂不可用（请检查 words_n*.json 或稍后刷新）；其余级别已就绪。";
+          } else {
+            corpusHintBar.classList.add("view-hidden");
+            corpusHintBar.textContent = "";
+          }
+        }
 
         migrateLegacyFavorites();
         favoriteSet = loadFavoritesFromLS();
@@ -4555,7 +4691,7 @@
       } catch (err) {
         bootError.classList.remove("is-hidden");
         bootError.innerHTML =
-          "无法加载 <code>words_n1.json</code> / <code>words_n2.json</code>。若直接双击打开 HTML，浏览器会拦截本地文件请求。<br /><br />请在本目录运行本地服务器，例如：<br /><code>npx serve .</code> 或 <code>python3 -m http.server</code><br /><br />然后再用浏览器访问页面。";
+          "无法加载词库（至少需要可用的 <code>words_n1.json</code> 与 <code>words_n2.json</code>）。若直接双击打开 HTML，浏览器会拦截本地文件请求。<br /><br />请在本目录运行本地服务器，例如：<br /><code>npx serve .</code> 或 <code>python3 -m http.server</code><br /><br />然后再用浏览器访问页面。";
         document.body.classList.remove("is-loading");
         console.error(err);
       }

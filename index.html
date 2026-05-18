@@ -1907,9 +1907,11 @@
 
     .squirrel-companion {
       position: fixed;
+      top: auto;
+      left: auto;
       right: max(10px, env(safe-area-inset-right));
       bottom: max(76px, calc(76px + env(safe-area-inset-bottom)));
-      z-index: 95;
+      z-index: 160;
       display: flex;
       flex-direction: column;
       align-items: flex-end;
@@ -1918,13 +1920,14 @@
       user-select: none;
       max-width: min(200px, 42vw);
       transition: opacity 0.45s ease, transform 0.35s ease;
+      contain: layout paint;
     }
 
     @media (max-width: 719px) {
       .squirrel-companion:not(.sq-sleeping) {
-        right: max(6px, env(safe-area-inset-right));
-        bottom: max(100px, calc(88px + env(safe-area-inset-bottom)));
-        max-width: min(240px, 55vw);
+        right: max(4px, env(safe-area-inset-right));
+        bottom: max(74px, calc(66px + env(safe-area-inset-bottom)));
+        max-width: min(210px, 48vw);
       }
     }
 
@@ -1978,8 +1981,8 @@
 
     @media (max-width: 719px) {
       .squirrel-stage {
-        width: 90px;
-        height: 90px;
+        width: 76px;
+        height: 76px;
       }
     }
 
@@ -2018,6 +2021,13 @@
       transition: filter 0.45s ease;
     }
 
+    @media (max-width: 719px) {
+      .squirrel-art {
+        width: 76px;
+        height: 76px;
+      }
+    }
+
     .squirrel-img-wrap {
       width: 90px;
       height: 90px;
@@ -2028,6 +2038,13 @@
       animation: mascotFloat 3.8s ease-in-out infinite;
     }
 
+    @media (max-width: 719px) {
+      .squirrel-img-wrap {
+        width: 76px;
+        height: 76px;
+      }
+    }
+
     .squirrel-mascot-img {
       width: 90px;
       height: 90px;
@@ -2036,6 +2053,13 @@
       object-fit: contain;
       display: block;
       transition: transform 0.25s ease, filter 0.35s ease;
+    }
+
+    @media (max-width: 719px) {
+      .squirrel-mascot-img {
+        width: 76px;
+        height: 76px;
+      }
     }
 
     @keyframes mascotFloat {
@@ -2127,6 +2151,14 @@
     .mascot-bubble.show {
       opacity: 1;
       transform: translateY(0) scale(1);
+    }
+
+    @media (max-width: 719px) {
+      .mascot-bubble {
+        max-width: min(190px, 62vw);
+        padding: 8px 10px 10px;
+        font-size: 0.75rem;
+      }
     }
 
     #confettiLayer {
